@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+/* Light mode only - no dark mode */
+@layer base {
+  html {
+    @apply bg-white text-gray-900;
+  }
+
+  body {
+    @apply bg-white text-gray-900;
+  }
+}
+

@@ -1,0 +1,1399 @@
+[
+  {
+    "_id": "69fe28e6d393f47129a77251",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.6,
+      "humidity": 40.6,
+      "pressure": 102,
+      "gas_quality": 78
+    },
+    "timestamp": "2026-05-08T16:54:53.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77252",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.5,
+      "pressure": 102,
+      "gas_quality": 114
+    },
+    "timestamp": "2026-05-08T16:54:58.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77253",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.5,
+      "pressure": 102,
+      "gas_quality": 142
+    },
+    "timestamp": "2026-05-08T16:55:03.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77254",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.5,
+      "pressure": 102,
+      "gas_quality": 160
+    },
+    "timestamp": "2026-05-08T16:55:08.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77255",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.6,
+      "pressure": 102,
+      "gas_quality": 170
+    },
+    "timestamp": "2026-05-08T16:55:13.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77256",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.8,
+      "pressure": 102,
+      "gas_quality": 172
+    },
+    "timestamp": "2026-05-08T16:55:18.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77257",
+    "sensorId": 1,
+    "data": {
+      "temprature": 22,
+      "humidity": 41,
+      "pressure": 102,
+      "gas_quality": 173
+    },
+    "timestamp": "2026-05-08T16:55:23.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77258",
+    "sensorId": 1,
+    "data": {
+      "temprature": 22,
+      "humidity": 41,
+      "pressure": 102,
+      "gas_quality": 172
+    },
+    "timestamp": "2026-05-08T16:55:28.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77259",
+    "sensorId": 1,
+    "data": {
+      "temprature": 22,
+      "humidity": 40.9,
+      "pressure": 102,
+      "gas_quality": 171
+    },
+    "timestamp": "2026-05-08T16:55:33.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7725a",
+    "sensorId": 1,
+    "data": {
+      "temprature": 22,
+      "humidity": 40.8,
+      "pressure": 102,
+      "gas_quality": 169
+    },
+    "timestamp": "2026-05-08T16:55:38.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7725b",
+    "sensorId": 1,
+    "data": {
+      "temprature": 22,
+      "humidity": 40.9,
+      "pressure": 102,
+      "gas_quality": 167
+    },
+    "timestamp": "2026-05-08T16:55:43.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7725c",
+    "sensorId": 1,
+    "data": {
+      "temprature": 22,
+      "humidity": 40.7,
+      "pressure": 102,
+      "gas_quality": 165
+    },
+    "timestamp": "2026-05-08T16:55:48.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7725d",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.6,
+      "pressure": 102,
+      "gas_quality": 163
+    },
+    "timestamp": "2026-05-08T16:55:53.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7725e",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.5,
+      "pressure": 102,
+      "gas_quality": 161
+    },
+    "timestamp": "2026-05-08T16:55:58.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7725f",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 159
+    },
+    "timestamp": "2026-05-08T16:56:03.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77260",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 157
+    },
+    "timestamp": "2026-05-08T16:56:08.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77261",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 156
+    },
+    "timestamp": "2026-05-08T16:56:13.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77262",
+    "sensorId": 1,
+    "data": {
+      "temprature": 22,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 155
+    },
+    "timestamp": "2026-05-08T16:56:18.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77263",
+    "sensorId": 1,
+    "data": {
+      "temprature": 22,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 153
+    },
+    "timestamp": "2026-05-08T16:56:23.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77264",
+    "sensorId": 1,
+    "data": {
+      "temprature": 22,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 152
+    },
+    "timestamp": "2026-05-08T16:56:28.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77265",
+    "sensorId": 1,
+    "data": {
+      "temprature": 22,
+      "humidity": 40.2,
+      "pressure": 102,
+      "gas_quality": 151
+    },
+    "timestamp": "2026-05-08T16:56:33.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77266",
+    "sensorId": 1,
+    "data": {
+      "temprature": 22,
+      "humidity": 40.2,
+      "pressure": 102,
+      "gas_quality": 150
+    },
+    "timestamp": "2026-05-08T16:56:38.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77267",
+    "sensorId": 1,
+    "data": {
+      "temprature": 22,
+      "humidity": 40.2,
+      "pressure": 102,
+      "gas_quality": 151
+    },
+    "timestamp": "2026-05-08T16:56:43.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77268",
+    "sensorId": 1,
+    "data": {
+      "temprature": 22,
+      "humidity": 40.1,
+      "pressure": 102,
+      "gas_quality": 148
+    },
+    "timestamp": "2026-05-08T16:56:48.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77269",
+    "sensorId": 1,
+    "data": {
+      "temprature": 22,
+      "humidity": 40.1,
+      "pressure": 102,
+      "gas_quality": 147
+    },
+    "timestamp": "2026-05-08T16:56:53.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7726a",
+    "sensorId": 1,
+    "data": {
+      "temprature": 22,
+      "humidity": 40.1,
+      "pressure": 102,
+      "gas_quality": 147
+    },
+    "timestamp": "2026-05-08T16:56:58.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7726b",
+    "sensorId": 1,
+    "data": {
+      "temprature": 22,
+      "humidity": 40.1,
+      "pressure": 102,
+      "gas_quality": 148
+    },
+    "timestamp": "2026-05-08T16:57:03.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7726c",
+    "sensorId": 1,
+    "data": {
+      "temprature": 22,
+      "humidity": 40.1,
+      "pressure": 102,
+      "gas_quality": 147
+    },
+    "timestamp": "2026-05-08T16:57:08.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7726d",
+    "sensorId": 1,
+    "data": {
+      "temprature": 22,
+      "humidity": 40.1,
+      "pressure": 102,
+      "gas_quality": 146
+    },
+    "timestamp": "2026-05-08T16:57:13.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7726e",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.1,
+      "pressure": 102,
+      "gas_quality": 145
+    },
+    "timestamp": "2026-05-08T16:57:18.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7726f",
+    "sensorId": 1,
+    "data": {
+      "temprature": 22,
+      "humidity": 40.1,
+      "pressure": 102,
+      "gas_quality": 145
+    },
+    "timestamp": "2026-05-08T16:57:23.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77270",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.1,
+      "pressure": 102,
+      "gas_quality": 144
+    },
+    "timestamp": "2026-05-08T16:57:28.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77271",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.1,
+      "pressure": 102,
+      "gas_quality": 142
+    },
+    "timestamp": "2026-05-08T16:57:33.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77272",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.1,
+      "pressure": 102,
+      "gas_quality": 246
+    },
+    "timestamp": "2026-05-08T16:57:38.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77273",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.1,
+      "pressure": 102,
+      "gas_quality": 510
+    },
+    "timestamp": "2026-05-08T16:57:43.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77274",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.1,
+      "pressure": 102,
+      "gas_quality": 590
+    },
+    "timestamp": "2026-05-08T16:57:48.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77275",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.1,
+      "pressure": 102,
+      "gas_quality": 635
+    },
+    "timestamp": "2026-05-08T16:57:53.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77276",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.1,
+      "pressure": 102,
+      "gas_quality": 662
+    },
+    "timestamp": "2026-05-08T16:57:58.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77277",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.1,
+      "pressure": 102,
+      "gas_quality": 675
+    },
+    "timestamp": "2026-05-08T16:58:03.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77278",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.2,
+      "pressure": 102,
+      "gas_quality": 683
+    },
+    "timestamp": "2026-05-08T16:58:08.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77279",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.2,
+      "pressure": 102,
+      "gas_quality": 698
+    },
+    "timestamp": "2026-05-08T16:58:13.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7727a",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 705
+    },
+    "timestamp": "2026-05-08T16:58:18.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7727b",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.5,
+      "pressure": 102,
+      "gas_quality": 710
+    },
+    "timestamp": "2026-05-08T16:58:23.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7727c",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 713
+    },
+    "timestamp": "2026-05-08T16:58:28.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7727d",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 713
+    },
+    "timestamp": "2026-05-08T16:58:33.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7727e",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 697
+    },
+    "timestamp": "2026-05-08T16:58:38.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7727f",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 677
+    },
+    "timestamp": "2026-05-08T16:58:43.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77280",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 646
+    },
+    "timestamp": "2026-05-08T16:58:48.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77281",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 618
+    },
+    "timestamp": "2026-05-08T16:58:53.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77282",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 591
+    },
+    "timestamp": "2026-05-08T16:58:58.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77283",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 565
+    },
+    "timestamp": "2026-05-08T16:59:03.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77284",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 542
+    },
+    "timestamp": "2026-05-08T16:59:08.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77285",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 521
+    },
+    "timestamp": "2026-05-08T16:59:13.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77286",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 501
+    },
+    "timestamp": "2026-05-08T16:59:18.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77287",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 481
+    },
+    "timestamp": "2026-05-08T16:59:23.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77288",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 464
+    },
+    "timestamp": "2026-05-08T16:59:28.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77289",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 447
+    },
+    "timestamp": "2026-05-08T16:59:33.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7728a",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 432
+    },
+    "timestamp": "2026-05-08T16:59:38.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7728b",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 417
+    },
+    "timestamp": "2026-05-08T16:59:43.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7728c",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 405
+    },
+    "timestamp": "2026-05-08T16:59:48.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7728d",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 392
+    },
+    "timestamp": "2026-05-08T16:59:53.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7728e",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 381
+    },
+    "timestamp": "2026-05-08T16:59:58.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7728f",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.2,
+      "pressure": 102,
+      "gas_quality": 370
+    },
+    "timestamp": "2026-05-08T17:00:03.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77290",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 360
+    },
+    "timestamp": "2026-05-08T17:00:08.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77291",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.8,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 351
+    },
+    "timestamp": "2026-05-08T17:00:13.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77292",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.2,
+      "pressure": 102,
+      "gas_quality": 343
+    },
+    "timestamp": "2026-05-08T17:00:18.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77293",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.2,
+      "pressure": 102,
+      "gas_quality": 334
+    },
+    "timestamp": "2026-05-08T17:00:23.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77294",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.2,
+      "pressure": 102,
+      "gas_quality": 327
+    },
+    "timestamp": "2026-05-08T17:00:28.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77295",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.8,
+      "humidity": 40.2,
+      "pressure": 102,
+      "gas_quality": 319
+    },
+    "timestamp": "2026-05-08T17:00:33.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77296",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.8,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 313
+    },
+    "timestamp": "2026-05-08T17:00:38.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77297",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.8,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 307
+    },
+    "timestamp": "2026-05-08T17:00:43.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77298",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 301
+    },
+    "timestamp": "2026-05-08T17:00:48.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a77299",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 295
+    },
+    "timestamp": "2026-05-08T17:00:53.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7729a",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 290
+    },
+    "timestamp": "2026-05-08T17:00:58.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7729b",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 284
+    },
+    "timestamp": "2026-05-08T17:01:03.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7729c",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 279
+    },
+    "timestamp": "2026-05-08T17:01:08.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7729d",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 275
+    },
+    "timestamp": "2026-05-08T17:01:13.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7729e",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 270
+    },
+    "timestamp": "2026-05-08T17:01:18.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a7729f",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 267
+    },
+    "timestamp": "2026-05-08T17:01:23.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772a0",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.3,
+      "pressure": 102,
+      "gas_quality": 264
+    },
+    "timestamp": "2026-05-08T17:01:28.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772a1",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 259
+    },
+    "timestamp": "2026-05-08T17:01:33.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772a2",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.9,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 255
+    },
+    "timestamp": "2026-05-08T17:01:38.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772a3",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.8,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 252
+    },
+    "timestamp": "2026-05-08T17:01:43.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772a4",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.8,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 248
+    },
+    "timestamp": "2026-05-08T17:01:48.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772a5",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.8,
+      "humidity": 40.5,
+      "pressure": 102,
+      "gas_quality": 245
+    },
+    "timestamp": "2026-05-08T17:01:53.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772a6",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.8,
+      "humidity": 40.5,
+      "pressure": 102,
+      "gas_quality": 242
+    },
+    "timestamp": "2026-05-08T17:01:58.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772a7",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.8,
+      "humidity": 40.5,
+      "pressure": 102,
+      "gas_quality": 239
+    },
+    "timestamp": "2026-05-08T17:02:03.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772a8",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.8,
+      "humidity": 40.5,
+      "pressure": 102,
+      "gas_quality": 235
+    },
+    "timestamp": "2026-05-08T17:02:08.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772a9",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.8,
+      "humidity": 40.5,
+      "pressure": 102,
+      "gas_quality": 232
+    },
+    "timestamp": "2026-05-08T17:02:13.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772aa",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.8,
+      "humidity": 40.5,
+      "pressure": 102,
+      "gas_quality": 230
+    },
+    "timestamp": "2026-05-08T17:02:18.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772ab",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.8,
+      "humidity": 40.5,
+      "pressure": 102,
+      "gas_quality": 229
+    },
+    "timestamp": "2026-05-08T17:02:23.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772ac",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.8,
+      "humidity": 40.5,
+      "pressure": 102,
+      "gas_quality": 225
+    },
+    "timestamp": "2026-05-08T17:02:28.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772ad",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.8,
+      "humidity": 40.5,
+      "pressure": 102,
+      "gas_quality": 222
+    },
+    "timestamp": "2026-05-08T17:02:33.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772ae",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 221
+    },
+    "timestamp": "2026-05-08T17:02:38.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772af",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 40.5,
+      "pressure": 102,
+      "gas_quality": 219
+    },
+    "timestamp": "2026-05-08T17:02:43.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772b0",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 216
+    },
+    "timestamp": "2026-05-08T17:02:48.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772b1",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 215
+    },
+    "timestamp": "2026-05-08T17:02:53.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772b2",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 213
+    },
+    "timestamp": "2026-05-08T17:02:58.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772b3",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 210
+    },
+    "timestamp": "2026-05-08T17:03:03.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772b4",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 209
+    },
+    "timestamp": "2026-05-08T17:03:08.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772b5",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 207
+    },
+    "timestamp": "2026-05-08T17:03:13.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772b6",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 205
+    },
+    "timestamp": "2026-05-08T17:03:18.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772b7",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 40.4,
+      "pressure": 102,
+      "gas_quality": 205
+    },
+    "timestamp": "2026-05-08T17:03:23.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772b8",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 40.9,
+      "pressure": 102,
+      "gas_quality": 201
+    },
+    "timestamp": "2026-05-08T17:03:28.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772b9",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 41.1,
+      "pressure": 102,
+      "gas_quality": 200
+    },
+    "timestamp": "2026-05-08T17:03:33.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772ba",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 41.5,
+      "pressure": 102,
+      "gas_quality": 198
+    },
+    "timestamp": "2026-05-08T17:03:38.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772bb",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 41.5,
+      "pressure": 102,
+      "gas_quality": 197
+    },
+    "timestamp": "2026-05-08T17:03:43.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772bc",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 41.4,
+      "pressure": 102,
+      "gas_quality": 198
+    },
+    "timestamp": "2026-05-08T17:03:48.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772bd",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.6,
+      "humidity": 41.3,
+      "pressure": 102,
+      "gas_quality": 197
+    },
+    "timestamp": "2026-05-08T17:03:53.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772be",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.6,
+      "humidity": 41.1,
+      "pressure": 102,
+      "gas_quality": 195
+    },
+    "timestamp": "2026-05-08T17:03:58.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772bf",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.6,
+      "humidity": 41,
+      "pressure": 102,
+      "gas_quality": 192
+    },
+    "timestamp": "2026-05-08T17:04:03.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772c0",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.6,
+      "humidity": 41,
+      "pressure": 102,
+      "gas_quality": 190
+    },
+    "timestamp": "2026-05-08T17:04:08.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772c1",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.6,
+      "humidity": 41,
+      "pressure": 102,
+      "gas_quality": 189
+    },
+    "timestamp": "2026-05-08T17:04:13.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772c2",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.6,
+      "humidity": 40.9,
+      "pressure": 102,
+      "gas_quality": 187
+    },
+    "timestamp": "2026-05-08T17:04:18.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772c3",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 40.9,
+      "pressure": 102,
+      "gas_quality": 185
+    },
+    "timestamp": "2026-05-08T17:04:23.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772c4",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 40.8,
+      "pressure": 102,
+      "gas_quality": 185
+    },
+    "timestamp": "2026-05-08T17:04:28.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772c5",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 40.8,
+      "pressure": 102,
+      "gas_quality": 184
+    },
+    "timestamp": "2026-05-08T17:04:33.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772c6",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 40.7,
+      "pressure": 102,
+      "gas_quality": 184
+    },
+    "timestamp": "2026-05-08T17:04:38.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772c7",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.6,
+      "humidity": 40.7,
+      "pressure": 102,
+      "gas_quality": 182
+    },
+    "timestamp": "2026-05-08T17:04:43.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772c8",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.6,
+      "humidity": 40.7,
+      "pressure": 102,
+      "gas_quality": 181
+    },
+    "timestamp": "2026-05-08T17:04:48.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772c9",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.6,
+      "humidity": 40.7,
+      "pressure": 102,
+      "gas_quality": 179
+    },
+    "timestamp": "2026-05-08T17:04:53.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772ca",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.6,
+      "humidity": 40.7,
+      "pressure": 102,
+      "gas_quality": 178
+    },
+    "timestamp": "2026-05-08T17:04:58.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772cb",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.6,
+      "humidity": 40.8,
+      "pressure": 102,
+      "gas_quality": 181
+    },
+    "timestamp": "2026-05-08T17:05:03.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772cc",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.6,
+      "humidity": 41.6,
+      "pressure": 102,
+      "gas_quality": 183
+    },
+    "timestamp": "2026-05-08T17:05:08.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772cd",
+    "sensorId": 1,
+    "data": {
+      "temprature": 21.7,
+      "humidity": 41.4,
+      "pressure": 102,
+      "gas_quality": 184
+    },
+    "timestamp": "2026-05-08T17:05:13.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772ce",
+    "sensorId": 1,
+    "data": {
+      "temprature": 39.6,
+      "humidity": 35.3,
+      "pressure": 101,
+      "gas_quality": 182
+    },
+    "timestamp": "2026-05-08T17:05:18.818Z"
+  },
+  {
+    "_id": "69fe28e6d393f47129a772cf",
+    "sensorId": 1,
+    "data": {
+      "temprature": 49.5,
+      "humidity": 25.9,
+      "pressure": 102,
+      "gas_quality": 181
+    },
+    "timestamp": "2026-05-08T17:05:23.818Z"
+  }
+]
