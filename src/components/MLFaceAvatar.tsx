@@ -2,35 +2,29 @@
 
 import { useState, useEffect } from 'react';
 
-export type FaceState = 'normal' | 'happy' | 'confused' | 'sad';
+// Only 3 states: maps ML labels to avatar expressions
+// normal → happy, warning → neutral, critical → sad
+export type FaceState = 'normal' | 'warning' | 'critical';
 
 const TARGETS = {
   normal: {
-    color: '#000000', // Black
-    lEye: { rx: 12, ry: 16, cy: 80 },
-    rEye: { rx: 12, ry: 16, cy: 80 },
-    mouth: 'M 65 130 Q 100 130 135 130',
-    lBrow: 'M 50 55 Q 65 52 80 55',
-    rBrow: 'M 120 55 Q 135 52 150 55',
-  },
-  happy: {
-    color: '#000000', // Black
+    color: '#000000',
     lEye: { rx: 14, ry: 8, cy: 75 },
     rEye: { rx: 14, ry: 8, cy: 75 },
     mouth: 'M 60 120 Q 100 160 140 120',
     lBrow: 'M 50 45 Q 65 40 80 50',
     rBrow: 'M 120 50 Q 135 40 150 45',
   },
-  confused: {
-    color: '#000000', // Black
+  warning: {
+    color: '#000000',
     lEye: { rx: 12, ry: 16, cy: 80 },
-    rEye: { rx: 10, ry: 8, cy: 80 },
-    mouth: 'M 70 135 Q 100 125 130 135',
-    lBrow: 'M 55 65 Q 65 60 80 65',
-    rBrow: 'M 120 45 Q 135 40 150 50',
+    rEye: { rx: 12, ry: 16, cy: 80 },
+    mouth: 'M 65 130 Q 100 130 135 130',
+    lBrow: 'M 50 55 Q 65 52 80 55',
+    rBrow: 'M 120 55 Q 135 52 150 55',
   },
-  sad: {
-    color: '#000000', // Black
+  critical: {
+    color: '#000000',
     lEye: { rx: 12, ry: 12, cy: 85 },
     rEye: { rx: 12, ry: 12, cy: 85 },
     mouth: 'M 65 145 Q 100 125 135 145',

@@ -6,7 +6,7 @@ import type { ChatMessage, SSEEvent } from "@/lib/langgraph/types";
 import connectToDatabase from "@/lib/mongodb";
 import Reading from "@/models/Reading";
 
-
+const ML_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const REQUEST_TIMEOUT_MS = 120_000;
 
 function getSensorStatus(key: string, value: number): string {
@@ -15,6 +15,47 @@ function getSensorStatus(key: string, value: number): string {
   if (key === "pressure") return value < 98 || value > 106 ? "Critical" : value < 100 || value > 104 ? "High" : "Normal";
   if (key === "gas_quality") return value > 500 ? "Critical" : value > 200 ? "High" : "Normal";
   return "Unknown";
+}
+
+// ── Fetch ML predictions from FastAPI ──────────────────────────────────────
+async function fetchMLContext(dataArray: any[]): Promise<string> {
+  try {
+    if (!dataArray || dataArray.length < 15) return "";
+
+    const history = dataArray.map((r: any) => {
+      const d = r.data || {};
+      return {
+        temprature: d.temprature ?? d.temperature ?? 0,
+        humidity: d.humidity ?? 0,
+        pressure: d.pressure ?? 102,
+        gas_quality: d.gas_quality ?? d.gasQuality ?? 0,
+      };
+    });
+
+    const res = await fetch(`${ML_API_URL}/predict-sequence`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ history, num_predictions: 20 }),
+      signal: AbortSignal.timeout(15000),
+    });
+
+    if (!res.ok) return "";
+
+    const data = await res.json();
+    const { predictions, summary } = data;
+
+    const labelSeq = predictions.map((p: any) => p.predicted_label).join(" → ");
+    const latestRul = summary.latest_rul?.toFixed(1) ?? "N/A";
+
+    return `\nML MODEL PREDICTIONS (${summary.total_predictions} analyses):
+Sequence: ${labelSeq}
+Current ML Status: ${summary.latest_label?.toUpperCase()} | Trend: ${summary.trend?.toUpperCase()}
+Normal: ${summary.normal_count} | Warning: ${summary.warning_count} | Critical: ${summary.critical_count}
+RUL: ${latestRul} cycles remaining
+IMPORTANT: ML predictions override threshold rules. If ML says warning/critical, report the issue.`;
+  } catch {
+    return "";
+  }
 }
 
 async function buildSensorContext(): Promise<string> {
@@ -59,7 +100,11 @@ async function buildSensorContext(): Promise<string> {
     const humids = recent.map((r: any) => r.data?.humidity).filter((v: any) => v != null);
     const pressures = recent.map((r: any) => r.data?.pressure).filter((v: any) => v != null);
     const gases = recent.map((r: any) => r.data?.gas_quality).filter((v: any) => v != null);
-    return `OPTICELL FACILITY - LIVE SENSOR DATA\nLast Update: ${ts} | Overall: ${overall}\nCurrent: Temp=${d.temprature ?? "N/A"}C(${tS}), Humidity=${d.humidity ?? "N/A"}%(${hS}), Pressure=${d.pressure ?? "N/A"}hPa(${pS}), Gas=${d.gas_quality ?? "N/A"}(${gS})\nTrends: Temp avg=${avg(temps)} ${trend(temps)}, Humidity avg=${avg(humids)} ${trend(humids)}, Pressure avg=${avg(pressures)} ${trend(pressures)}, Gas avg=${avg(gases)} ${trend(gases)}\nTABLE_DATA:\nTemperature|${d.temprature ?? "N/A"} C|${tS}\nHumidity|${d.humidity ?? "N/A"} %|${hS}\nPressure|${d.pressure ?? "N/A"} hPa|${pS}\nGas Quality|${d.gas_quality ?? "N/A"}|${gS}`;
+
+    // Fetch ML predictions
+    const mlContext = await fetchMLContext(dataArray);
+
+    return `OPTICELL FACILITY - LIVE SENSOR DATA\nLast Update: ${ts} | Overall: ${overall}\nCurrent: Temp=${d.temprature ?? "N/A"}C(${tS}), Humidity=${d.humidity ?? "N/A"}%(${hS}), Pressure=${d.pressure ?? "N/A"}hPa(${pS}), Gas=${d.gas_quality ?? "N/A"}(${gS})\nTrends: Temp avg=${avg(temps)} ${trend(temps)}, Humidity avg=${avg(humids)} ${trend(humids)}, Pressure avg=${avg(pressures)} ${trend(pressures)}, Gas avg=${avg(gases)} ${trend(gases)}${mlContext}\nTABLE_DATA:\nTemperature|${d.temprature ?? "N/A"} C|${tS}\nHumidity|${d.humidity ?? "N/A"} %|${hS}\nPressure|${d.pressure ?? "N/A"} hPa|${pS}\nGas Quality|${d.gas_quality ?? "N/A"}|${gS}`;
   } catch (err) {
     console.error("Failed to parse sensor context:", err);
     return "Sensor data temporarily unavailable.";
@@ -112,3 +157,4 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   return NextResponse.json({ status: "ok", service: "opticell-multi-agent", model: "llama-3.1-8b-instant", agents: ["Supervisor", "Analyst", "Critic", "Synthesizer"], timestamp: new Date().toISOString() });
 }
+

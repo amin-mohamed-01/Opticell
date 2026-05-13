@@ -32,10 +32,10 @@ function getStatusAndDetails(temp: number, humidity: number, pressure: number, g
   const parts: string[] = [];
 
   // Critical check
-  if (temp > 45)                    parts.push(`Temp ${temp.toFixed(1)}°C`);
-  if (humidity > 85)                parts.push(`Humidity ${humidity.toFixed(1)}%`);
+  if (temp > 45) parts.push(`Temp ${temp.toFixed(1)}°C`);
+  if (humidity > 85) parts.push(`Humidity ${humidity.toFixed(1)}%`);
   if (pressure < 98 || pressure > 106) parts.push(`Pressure ${pressure} hPa`);
-  if (gas > 500)                    parts.push(`Gas ${gas}`);
+  if (gas > 500) parts.push(`Gas ${gas}`);
 
   if (
     temp > 45 || humidity > 85 ||
@@ -45,10 +45,10 @@ function getStatusAndDetails(temp: number, humidity: number, pressure: number, g
 
   // Warning check
   parts.length = 0;
-  if (temp > 38)                            parts.push(`Temp ${temp.toFixed(1)}°C`);
-  if (humidity > 75)                        parts.push(`Humidity ${humidity.toFixed(1)}%`);
-  if (pressure < 100 || pressure > 104)     parts.push(`Pressure ${pressure} hPa`);
-  if (gas > 200)                            parts.push(`Gas ${gas}`);
+  if (temp > 38) parts.push(`Temp ${temp.toFixed(1)}°C`);
+  if (humidity > 75) parts.push(`Humidity ${humidity.toFixed(1)}%`);
+  if (pressure < 100 || pressure > 104) parts.push(`Pressure ${pressure} hPa`);
+  if (gas > 200) parts.push(`Gas ${gas}`);
 
   if (
     temp > 38 || humidity > 75 ||
@@ -60,15 +60,15 @@ function getStatusAndDetails(temp: number, humidity: number, pressure: number, g
 }
 
 function extractFields(data: Record<string, number | string>) {
-  const temp     = parseFloat(String(data['temperature'] ?? data['temprature'] ?? data['temp'] ?? 0));
-  const humidity = parseFloat(String(data['humidity']    ?? 0));
-  const pressure = parseFloat(String(data['pressure']    ?? 102));
-  const gas      = parseFloat(String(data['gas_quality'] ?? data['gasQuality']  ?? 0));
+  const temp = parseFloat(String(data['temperature'] ?? data['temprature'] ?? data['temp'] ?? 0));
+  const humidity = parseFloat(String(data['humidity'] ?? 0));
+  const pressure = parseFloat(String(data['pressure'] ?? 102));
+  const gas = parseFloat(String(data['gas_quality'] ?? data['gasQuality'] ?? 0));
   return {
-    temp:     isNaN(temp)     ? 0   : Math.round(temp * 10) / 10,
-    humidity: isNaN(humidity) ? 0   : Math.round(humidity * 10) / 10,
+    temp: isNaN(temp) ? 0 : Math.round(temp * 10) / 10,
+    humidity: isNaN(humidity) ? 0 : Math.round(humidity * 10) / 10,
     pressure: isNaN(pressure) ? 102 : pressure,
-    gas:      isNaN(gas)      ? 0   : gas,
+    gas: isNaN(gas) ? 0 : gas,
   };
 }
 
@@ -78,10 +78,10 @@ export const ReportsProvider = ({ children }: { children: ReactNode }) => {
 
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const emailEnabledRef  = useRef(emailReports);
-  const prevLengthRef    = useRef(0);
+  const emailEnabledRef = useRef(emailReports);
+  const prevLengthRef = useRef(0);
   const reportCounterRef = useRef(0);
 
   useEffect(() => { emailEnabledRef.current = emailReports; }, [emailReports]);
@@ -104,7 +104,7 @@ export const ReportsProvider = ({ children }: { children: ReactNode }) => {
       const batchId = `B${String(reportCounterRef.current).padStart(5, '0')}`;
 
       const newReport: Report = {
-        id:        batchId,
+        id: batchId,
         timestamp: new Date(doc.timestamp ?? Date.now()).toISOString(),
         status,
         details,
@@ -136,13 +136,13 @@ export const ReportsProvider = ({ children }: { children: ReactNode }) => {
         if (!Array.isArray(raw)) return;
 
         recordsToStream = raw.reverse();
-        
+
         // Initial batch to populate reports immediately
         const initialBatch = recordsToStream.slice(0, 15);
         currentIndex = 15;
 
         for (const doc of initialBatch) {
-           processRow(doc);
+          processRow(doc);
         }
 
         setLoading(false);
@@ -150,12 +150,12 @@ export const ReportsProvider = ({ children }: { children: ReactNode }) => {
 
         // Add a new row every 300ms to simulate fast real-time stream
         streamTimer = setInterval(() => {
-           if (currentIndex < recordsToStream.length) {
-              processRow(recordsToStream[currentIndex]);
-              currentIndex++;
-           } else {
-              currentIndex = 0;
-           }
+          if (currentIndex < recordsToStream.length) {
+            processRow(recordsToStream[currentIndex]);
+            currentIndex++;
+          } else {
+            currentIndex = 0;
+          }
         }, 300);
 
       } catch (err) {

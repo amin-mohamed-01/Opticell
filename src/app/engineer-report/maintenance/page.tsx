@@ -19,17 +19,17 @@ type Report = {
 const severityBadge = (severity: string) => {
   switch (severity) {
     case 'high': return 'bg-red-100 text-red-700 border border-red-200';
-    case 'medium':  return 'bg-yellow-100 text-yellow-700 border border-yellow-200';
-    case 'low':         return 'bg-green-100 text-green-700 border border-green-200';
+    case 'medium': return 'bg-yellow-100 text-yellow-700 border border-yellow-200';
+    case 'low': return 'bg-green-100 text-green-700 border border-green-200';
     default: return 'bg-gray-100 text-gray-700 border border-gray-200';
   }
 };
 
 const statusIcon = (status: string) => {
   switch (status) {
-    case 'done':    return <CheckCircle className="w-4 h-4 text-green-500" />;
+    case 'done': return <CheckCircle className="w-4 h-4 text-green-500" />;
     case 'in_progress': return <Clock className="w-4 h-4 text-yellow-500" />;
-    default:            return <AlertTriangle className="w-4 h-4 text-red-500" />;
+    default: return <AlertTriangle className="w-4 h-4 text-red-500" />;
   }
 };
 
@@ -44,7 +44,7 @@ export default function MaintenanceReportPage() {
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     machine_id: '1',
@@ -129,7 +129,7 @@ export default function MaintenanceReportPage() {
               <p className="text-sm text-gray-500 mt-0.5">Engineer Report › Maintenance Report</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={() => setIsModalOpen(true)}
             className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition"
           >
@@ -225,22 +225,22 @@ export default function MaintenanceReportPage() {
               </button>
             </div>
             <form onSubmit={handleSubmit} className="p-6">
-              
+
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Machine ID</label>
-                  <input required type="number" value={formData.machine_id} onChange={e => setFormData({...formData, machine_id: e.target.value})} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  <input required type="number" value={formData.machine_id} onChange={e => setFormData({ ...formData, machine_id: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Alert ID</label>
-                  <input required type="number" value={formData.alert_id} onChange={e => setFormData({...formData, alert_id: e.target.value})} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  <input required type="number" value={formData.alert_id} onChange={e => setFormData({ ...formData, alert_id: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-                  <select value={formData.priority} onChange={e => setFormData({...formData, priority: e.target.value})} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white">
+                  <select value={formData.priority} onChange={e => setFormData({ ...formData, priority: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white">
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
                     <option value="high">High</option>
@@ -248,7 +248,7 @@ export default function MaintenanceReportPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white">
+                  <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white">
                     <option value="open">Open</option>
                     <option value="in_progress">In Progress</option>
                     <option value="done">Done</option>
@@ -258,7 +258,7 @@ export default function MaintenanceReportPage() {
 
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Human Review (Notes)</label>
-                <textarea rows={3} value={formData.human_review} onChange={e => setFormData({...formData, human_review: e.target.value})} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="Describe the issue or review..."></textarea>
+                <textarea rows={3} value={formData.human_review} onChange={e => setFormData({ ...formData, human_review: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="Describe the issue or review..."></textarea>
               </div>
 
               <div className="flex gap-3 justify-end">

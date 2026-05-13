@@ -48,9 +48,9 @@ export async function POST(req: Request) {
     lastStatuses[batchId] = currentStatus;
 
     if (!shouldSend) {
-      return NextResponse.json({ 
-        sent: false, 
-        message: 'No status escalation detected – email not sent' 
+      return NextResponse.json({
+        sent: false,
+        message: 'No status escalation detected – email not sent'
       });
     }
 
@@ -69,10 +69,10 @@ export async function POST(req: Request) {
 
     // Prepare email content
     const alertType = currentStatus; // Normal/Warning/Critical
-    const alertColor = 
+    const alertColor =
       currentStatus === 'Critical' ? '#dc2626' :
-      currentStatus === 'Warning'  ? '#f59e0b' : 
-      '#16a34a';
+        currentStatus === 'Warning' ? '#f59e0b' :
+          '#16a34a';
 
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
@@ -95,9 +95,9 @@ export async function POST(req: Request) {
       html,
     });
 
-    return NextResponse.json({ 
-      sent: true, 
-      message: 'Alert email sent successfully' 
+    return NextResponse.json({
+      sent: true,
+      message: 'Alert email sent successfully'
     });
   } catch (error) {
     console.error('Email send error:', error);

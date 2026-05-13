@@ -668,8 +668,27 @@ function renderContentWithTables(content: string): string {
     }
   );
 
+  // ── 3. Render ## / ### markdown headings ─────────────────────────────────
+  result = renderMarkdownHeadings(result);
+
   return result;
 }
+
+// ── Render ## / ### markdown headings ────────────────────────────────────────
+function renderMarkdownHeadings(html: string): string {
+  // ### Sub-heading (must come before ##)
+  html = html.replace(
+    /^### (.+)$/gm,
+    '<h3 style="font-size:14px;font-weight:700;color:#1e40af;margin:14px 0 6px 0;padding-bottom:3px;border-bottom:1px solid #dbeafe;">$1</h3>'
+  );
+  // ## Main Heading
+  html = html.replace(
+    /^## (.+)$/gm,
+    '<h2 style="font-size:16px;font-weight:800;color:#1e3a8a;margin:18px 0 8px 0;padding-bottom:4px;border-bottom:2px solid #bfdbfe;">$1</h2>'
+  );
+  return html;
+}
+
 
 // ─── AgentTraceUI Component ──────────────────────────────────────────────────
 
@@ -724,12 +743,16 @@ function ChatWindow({
 }) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isDeepThinking, setIsDeepThinking] = useState(false); // State for animation type
-  const [agentStatus, setAgentStatus] = useState(''); // Holds multi-agent status text
+  const [isDeepThinking, setIsDeepThinking] = useState(false);
+  const [agentStatus, setAgentStatus] = useState('');
   const [streamingContent, setStreamingContent] = useState('');
   const [streamingSteps, setStreamingSteps] = useState<AgentStep[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const thinkingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Typewriter refs — survive re-renders without causing them
+  const charQueueRef = useRef<string[]>([]);
+  const typewriterRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const displayedTextRef = useRef('');
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -744,10 +767,32 @@ function ChatWindow({
     displayedMessages.push({
       role: 'assistant',
       content: streamingContent,
-      agentSteps: streamingSteps
+      agentSteps: streamingSteps,
     });
   }
 
+  // ── Start / stop the typewriter interval ────────────────────────────────────
+  const startTypewriter = (onDone: () => void) => {
+    // Clear any previous interval
+    if (typewriterRef.current) clearInterval(typewriterRef.current);
+
+    typewriterRef.current = setInterval(() => {
+      const queue = charQueueRef.current;
+      if (queue.length === 0) return;
+
+      // Drain up to 4 chars per tick → feels smooth, not laggy
+      const batch = queue.splice(0, 4).join('');
+      displayedTextRef.current += batch;
+      setStreamingContent(stripEmojis(displayedTextRef.current));
+    }, 15); // ~15 ms ≈ 67 fps — very smooth
+  };
+
+  const stopTypewriter = () => {
+    if (typewriterRef.current) {
+      clearInterval(typewriterRef.current);
+      typewriterRef.current = null;
+    }
+  };
 
   const handleSend = async () => {
     if (!input.trim() || loading || !conversationId) return;
@@ -763,17 +808,24 @@ function ChatWindow({
     setAgentStatus('Analyzing your request...');
     setIsDeepThinking(false);
 
-    // Switch to deep thinking animation after 1.5s
+    // Reset typewriter state
+    charQueueRef.current = [];
+    displayedTextRef.current = '';
+    stopTypewriter();
+
+    // Show thinking animation after 1.5 s if no tokens yet
     thinkingTimerRef.current = setTimeout(() => {
       setIsDeepThinking(true);
     }, 1500);
 
-    let assistantText = '';
-    let currentSteps: AgentStep[] = [];
-    let gotFinalAnswer = false;
+    let fullText = '';
+    let streamDone = false;
+
+    // Start the typewriter — it will keep running until we stop it
+    startTypewriter(() => { });
 
     try {
-      const res = await fetch('/api/ai/multi-agent', {
+      const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: updatedMessages }),
@@ -784,95 +836,60 @@ function ChatWindow({
       if (res.body) {
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
-        let buffer = '';
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
-          // Clear the thinking timer when first data arrives
+          // First token → kill the thinking spinner
           if (thinkingTimerRef.current) {
             clearTimeout(thinkingTimerRef.current);
             thinkingTimerRef.current = null;
             setIsDeepThinking(true);
           }
 
-          buffer += decoder.decode(value, { stream: true });
-          const parts = buffer.split('\n\n');
-          buffer = parts.pop() || '';
-
-          for (const part of parts) {
-            const line = part.trim();
-            if (!line.startsWith('data: ')) continue;
-            const dataStr = line.slice(6).trim();
-            if (!dataStr) continue;
-
-            try {
-              const event = JSON.parse(dataStr);
-
-              if (event.type === 'error') {
-                assistantText = `Error: ${event.message}`;
-                setStreamingContent(assistantText);
-                break;
-              }
-
-              if (event.type === 'agent_start') {
-                setAgentStatus(event.message || `${event.agent} working...`);
-                setIsDeepThinking(true);
-                // Add non-supervisor/synthesizer agents to the accordion
-                if (event.agent !== 'Synthesizer' && event.agent !== 'Supervisor') {
-                  currentSteps = [...currentSteps, { agent: event.agent, action: event.message, content: '' }];
-                  setStreamingSteps([...currentSteps]);
-                }
-              }
-
-              if (event.type === 'token') {
-                if (event.agent === 'Supervisor') continue; // hide supervisor routing JSON
-                if (event.agent === 'Synthesizer') {
-                  // Synthesizer tokens stream as the final message
-                  assistantText += event.content;
-                  setStreamingContent(stripEmojis(assistantText));
-                } else {
-                  // Worker agent tokens go into the accordion
-                  if (currentSteps.length > 0) {
-                    currentSteps[currentSteps.length - 1].content += event.content;
-                    setStreamingSteps([...currentSteps]);
-                  }
-                }
-              }
-
-              // ✅ FINAL ANSWER — this is the definitive message, always use it
-              if (event.type === 'final_answer' && event.content) {
-                assistantText = event.content;
-                gotFinalAnswer = true;
-                setStreamingContent(stripEmojis(assistantText));
-              }
-            } catch (e) {
-              console.error('Failed to parse SSE event:', e, dataStr);
-            }
+          const chunk = decoder.decode(value, { stream: true });
+          fullText += chunk;
+          // Push every character into the typewriter queue
+          for (const ch of chunk) {
+            charQueueRef.current.push(ch);
           }
         }
       }
     } catch (err) {
       console.error('Chat error:', err);
-      assistantText = 'An error occurred while connecting to the server. Please try again.';
+      const errMsg = 'An error occurred while connecting to the server. Please try again.';
+      fullText = errMsg;
+      for (const ch of errMsg) charQueueRef.current.push(ch);
     } finally {
       if (thinkingTimerRef.current) {
         clearTimeout(thinkingTimerRef.current);
         thinkingTimerRef.current = null;
       }
-      setLoading(false);
-      setIsDeepThinking(false);
-      setAgentStatus('');
     }
 
-    // Save the final message
-    const finalContent = assistantText.trim();
+    // Wait until the typewriter has drained the full queue before saving
+    await new Promise<void>((resolve) => {
+      const poll = setInterval(() => {
+        if (charQueueRef.current.length === 0) {
+          clearInterval(poll);
+          resolve();
+        }
+      }, 30);
+    });
+
+    // ── Tear down ─────────────────────────────────────────────────────────────
+    stopTypewriter();
+    setLoading(false);
+    setIsDeepThinking(false);
+    setAgentStatus('');
+
+    // Persist the complete final message
+    const finalContent = fullText.trim();
     if (finalContent) {
       const assistantMessage: Message = {
         role: 'assistant',
         content: stripEmojis(finalContent),
-        agentSteps: currentSteps.length > 0 ? currentSteps : undefined,
       };
       onSend([...updatedMessages, assistantMessage]);
     }
@@ -880,6 +897,8 @@ function ChatWindow({
     setStreamingContent('');
     setStreamingSteps([]);
   };
+
+
 
   return (
     <>

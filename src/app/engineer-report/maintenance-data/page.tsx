@@ -21,13 +21,13 @@ export default function MaintenanceDataPage() {
   const [data, setData] = useState<DataEntry[]>([]);
   const [fetching, setFetching] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
-  
+
   const [search, setSearch] = useState('');
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     report_id: '',
@@ -84,11 +84,11 @@ export default function MaintenanceDataPage() {
 
       await fetchData();
       setIsModalOpen(false);
-      setFormData({ 
-        report_id: '', 
-        maintenance_date: new Date().toISOString().split('T')[0], 
-        maintenance_type: 'inspection', 
-        notes: '' 
+      setFormData({
+        report_id: '',
+        maintenance_date: new Date().toISOString().split('T')[0],
+        maintenance_type: 'inspection',
+        notes: ''
       });
     } catch (err: any) {
       alert(`Error: ${err.message}`);
@@ -100,7 +100,7 @@ export default function MaintenanceDataPage() {
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (!user) return null;
 
-  const filtered = data.filter((d) => 
+  const filtered = data.filter((d) =>
     d.report_id.toString().includes(search.toLowerCase()) ||
     (d.notes && d.notes.toLowerCase().includes(search.toLowerCase())) ||
     d.maintenance_type.toLowerCase().includes(search.toLowerCase())
@@ -120,7 +120,7 @@ export default function MaintenanceDataPage() {
               <p className="text-sm text-gray-500 mt-0.5">Engineer Report › Maintenance Report Data</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={() => setIsModalOpen(true)}
             className="flex items-center gap-2 rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-purple-700 transition"
           >
@@ -146,7 +146,7 @@ export default function MaintenanceDataPage() {
           <Filter className="w-4 h-4" />
           <span>Filter:</span>
         </div>
-        
+
         <input
           type="text"
           placeholder="Search by Report ID, type, or notes..."
@@ -219,20 +219,20 @@ export default function MaintenanceDataPage() {
               </button>
             </div>
             <form onSubmit={handleSubmit} className="p-6">
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Report ID (must exist in Maintenance Report table)</label>
-                <input required type="number" value={formData.report_id} onChange={e => setFormData({...formData, report_id: e.target.value})} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500" placeholder="e.g. 1" />
+                <input required type="number" value={formData.report_id} onChange={e => setFormData({ ...formData, report_id: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500" placeholder="e.g. 1" />
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance Date</label>
-                  <input required type="date" value={formData.maintenance_date} onChange={e => setFormData({...formData, maintenance_date: e.target.value})} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500" />
+                  <input required type="date" value={formData.maintenance_date} onChange={e => setFormData({ ...formData, maintenance_date: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                  <select value={formData.maintenance_type} onChange={e => setFormData({...formData, maintenance_type: e.target.value})} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 bg-white">
+                  <select value={formData.maintenance_type} onChange={e => setFormData({ ...formData, maintenance_type: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 bg-white">
                     <option value="inspection">Inspection</option>
                     <option value="repair">Repair</option>
                     <option value="replace">Replace</option>
@@ -242,7 +242,7 @@ export default function MaintenanceDataPage() {
 
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                <textarea rows={3} value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500" placeholder="Enter notes here..."></textarea>
+                <textarea rows={3} value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500" placeholder="Enter notes here..."></textarea>
               </div>
 
               <div className="flex gap-3 justify-end">

@@ -9,10 +9,9 @@ const MLFaceAvatar = dynamic(() => import('./MLFaceAvatar'), { ssr: false });
 interface MLFaceModalProps { onClose: () => void; }
 
 const STATES: { value: FaceState; label: string; emoji: string; desc: string; color: string }[] = [
-  { value: 'normal',   label: 'Normal',   emoji: '😐', desc: 'System operating normally', color: '#3B82F6' },
-  { value: 'happy',    label: 'Happy',    emoji: '😊', desc: 'All checks passed!',         color: '#22C55E' },
-  { value: 'confused', label: 'Confused', emoji: '😕', desc: 'Warning detected',           color: '#F59E0B' },
-  { value: 'sad',      label: 'Sad',      emoji: '😢', desc: 'Critical issue found',       color: '#EF4444' },
+  { value: 'normal',   label: 'Normal',   emoji: '😊', desc: 'System operating normally', color: '#22C55E' },
+  { value: 'warning',  label: 'Warning',  emoji: '😐', desc: 'Warning detected',          color: '#F59E0B' },
+  { value: 'critical', label: 'Critical', emoji: '😢', desc: 'Critical issue found',       color: '#EF4444' },
 ];
 
 export default function MLFaceModal({ onClose }: MLFaceModalProps) {
@@ -33,9 +32,9 @@ export default function MLFaceModal({ onClose }: MLFaceModalProps) {
           <div>
             <div className="mlf-title-row">
               <h2 className="mlf-title">ML Face</h2>
-              <span className="mlf-badge">Future Work</span>
+              <span className="mlf-badge">ML Active</span>
             </div>
-            <p className="mlf-sub">3D Reactive Avatar · State-Based</p>
+            <p className="mlf-sub">2D Reactive Avatar · ML-Driven</p>
           </div>
           <button className="mlf-close" onClick={onClose} aria-label="Close">✕</button>
         </div>
@@ -68,7 +67,7 @@ export default function MLFaceModal({ onClose }: MLFaceModalProps) {
 
         {/* Note */}
         <div className="mlf-note">
-          🤖 <strong>Future:</strong> An ML model will automatically drive this avatar&apos;s state based on real-time analysis results.
+          🤖 <strong>Active:</strong> The ML model drives this avatar&apos;s state based on real-time sensor analysis.
         </div>
       </div>
 
@@ -100,7 +99,7 @@ export default function MLFaceModal({ onClose }: MLFaceModalProps) {
         .mlf-title { font-size:1.15rem; font-weight:700; color:#111827; }
         .mlf-badge {
           font-size:0.62rem; font-weight:600; padding:2px 8px; border-radius:999px;
-          background:#EDE9FE; color:#7C3AED; border:1px solid #C4B5FD;
+          background:#DCFCE7; color:#16A34A; border:1px solid #86EFAC;
           text-transform:uppercase; letter-spacing:0.06em;
         }
         .mlf-sub { font-size:0.76rem; color:#9CA3AF; margin-top:3px; }
@@ -132,7 +131,7 @@ export default function MLFaceModal({ onClose }: MLFaceModalProps) {
           margin-bottom:14px; min-height:18px; transition:color 0.4s;
         }
 
-        .mlf-btns { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:14px; }
+        .mlf-btns { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
         .mlf-btn {
           display:flex; flex-direction:column; align-items:center; gap:4px;
           padding:10px 6px; border-radius:10px;
@@ -149,7 +148,7 @@ export default function MLFaceModal({ onClose }: MLFaceModalProps) {
           background:#F9FAFB; border:1px solid #E5E7EB;
           border-radius:10px; padding:10px 14px; line-height:1.5;
         }
-        .mlf-note strong { color:#7C3AED; }
+        .mlf-note strong { color:#16A34A; }
       `}</style>
     </div>
   );
