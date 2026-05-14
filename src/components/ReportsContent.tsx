@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
 import { useReports, Report } from '@/providers/ReportsProvider';
+import { utils, writeFile } from 'xlsx';
 
 export default function ReportsContent() {
   const { user, loading: authLoading } = useAuth();
@@ -25,6 +26,26 @@ export default function ReportsContent() {
     r.details.toLowerCase().includes(searchTerm.toLowerCase()) ||
     r.status.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleExport = () => {
+    if (filteredReports.length === 0) return;
+
+    const exportData = filteredReports.map((r) => ({
+      Timestamp: new Date(r.timestamp).toLocaleString(),
+      'Batch ID': r.id,
+      Status: r.status,
+      'Temperature (°C)': r.temp.toFixed(1),
+      'Humidity (%)': r.humidity.toFixed(1),
+      'Pressure (hPa)': r.pressure,
+      'Gas Quality': r.gasQuality,
+      Details: r.details,
+    }));
+
+    const worksheet = utils.json_to_sheet(exportData);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, 'Reports');
+    writeFile(workbook, 'reports_file.xlsx');
+  };
 
   const badgeClass = (status: Report['status']) => {
     switch (status) {
@@ -60,7 +81,10 @@ export default function ReportsContent() {
               {filteredReports.length} record{filteredReports.length !== 1 ? 's' : ''} shown
             </p>
           </div>
-          <button className="rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition">
+          <button
+            onClick={handleExport}
+            className="rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
+          >
             Export All
           </button>
         </div>

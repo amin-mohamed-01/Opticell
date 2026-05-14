@@ -46,9 +46,9 @@ const LABEL_TO_FACE: Record<string, FaceState> = {
 
 // Label → UI metadata
 const LABEL_META: Record<string, { emoji: string; label: string; color: string; bg: string }> = {
-  normal: { emoji: '😊', label: 'Normal', color: '#22C55E', bg: 'rgba(34,197,94,0.1)' },
-  warning: { emoji: '😐', label: 'Warning', color: '#F59E0B', bg: 'rgba(245,158,11,0.1)' },
-  critical: { emoji: '😢', label: 'Critical', color: '#EF4444', bg: 'rgba(239,68,68,0.1)' },
+  normal: { emoji: '', label: 'Normal', color: '#22C55E', bg: 'rgba(34,197,94,0.1)' },
+  warning: { emoji: '', label: 'Warning', color: '#F59E0B', bg: 'rgba(245,158,11,0.1)' },
+  critical: { emoji: '', label: 'Critical', color: '#EF4444', bg: 'rgba(239,68,68,0.1)' },
 };
 
 export default function MLFacePage() {
@@ -309,9 +309,9 @@ export default function MLFacePage() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {[
-              { label: 'Normal →', desc: 'System healthy 😊' },
-              { label: 'Warning →', desc: 'Anomaly detected 😐' },
-              { label: 'Critical →', desc: 'Failure imminent 😢' },
+              { label: 'Normal →', desc: 'System healthy' },
+              { label: 'Warning →', desc: 'Anomaly detected' },
+              { label: 'Critical →', desc: 'Failure imminent' },
             ].map((item) => (
               <div key={item.label} style={{ display: 'flex', gap: '6px', fontSize: '0.7rem' }}>
                 <span style={{ fontWeight: 600, color: '#7C3AED' }}>{item.label}</span>
