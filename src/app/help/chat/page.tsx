@@ -302,12 +302,7 @@ export default function ChatPage() {
 
       {/* Main area */}
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="border-b border-gray-200 bg-white px-6 py-4 flex items-center justify-between">
-          <img
-            src="/logo.png"
-            alt="Opticell"
-            className="h-8 w-auto"
-          />
+        <div className="border-b border-gray-200 bg-white px-6 py-4 flex items-center justify-end lg:hidden">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"

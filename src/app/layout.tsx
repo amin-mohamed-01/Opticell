@@ -14,6 +14,9 @@ const inter = Inter({ subsets: ['latin',] }); // ← added 'arabic' subset
 export const metadata: Metadata = {
   title: 'OptiCell',
   description: 'Bioreactor Monitoring Dashboard',
+  icons: {
+    icon: '/logo.png',
+  },
 };
 
 export default function RootLayout({

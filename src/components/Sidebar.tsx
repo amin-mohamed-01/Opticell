@@ -43,7 +43,8 @@ export default function Sidebar() {
 
   return (
     <div className="flex flex-col w-64 bg-white border-r border-gray-200">
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-6 border-b border-gray-200 flex items-center gap-3">
+        <img src="/logo.png" alt="Opticell Logo" className="w-8 h-8 object-contain" />
         <h1 className="text-2xl font-bold text-gray-900">Opticell</h1>
       </div>
 
