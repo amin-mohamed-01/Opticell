@@ -6,7 +6,7 @@ export interface IReading extends Document {
   timestamp: Date;
 }
 
-export const ReadingSchema = new Schema<IReading>(
+const ReadingSchema = new Schema<IReading>(
   {
     sensorId: { type: Number, required: true },
     data: { type: Schema.Types.Mixed, required: true },
