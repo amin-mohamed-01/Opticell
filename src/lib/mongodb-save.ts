@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const MONGODB_SAVE_URI = process.env.MONGODB_SAVE_URI;
+const MONGODB_SAVE_URI = process.env.MONGODB_SAVE_URI as string;
 
 if (!MONGODB_SAVE_URI) {
   throw new Error(
