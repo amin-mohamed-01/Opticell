@@ -17,6 +17,7 @@
  */
 
 import { DEFAULT_MODEL, type ChatMessage } from "./types";
+import { groqFetch } from "../groq-fetch";
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Core Groq API caller
@@ -28,13 +29,9 @@ async function callGroq(
   onToken: (token: string) => void,
   maxTokens: number = 600
 ): Promise<string> {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) throw new Error("GROQ_API_KEY is not set in .env.local");
-
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+  const response = await groqFetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({

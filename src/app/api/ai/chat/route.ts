@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import connectToDatabase from '@/lib/mongodb';
 import Reading from '@/models/Reading';
+import { groqFetch } from '@/lib/groq-fetch';
 
 const ML_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -44,10 +45,9 @@ async function translateText(text: string, targetLang: 'English' | 'Arabic'): Pr
          Text to translate:
          ${text}`;
 
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const res = await groqFetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -604,10 +604,9 @@ STRICT CHART RULES:
     ];
 
     // ── 2. Handle Groq Call (Conditional Streaming) ────────────────────────
-    const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const groqResponse = await groqFetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

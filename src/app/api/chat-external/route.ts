@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { groqFetch } from '@/lib/groq-fetch';
 import fs from 'fs';
 import path from 'path';
 import connectToDatabase from '@/lib/mongodb';
@@ -84,10 +85,9 @@ Provide professional, detailed guidance on sensor monitoring and equipment maint
 If asked off-topic questions, politely redirect to industrial maintenance.`;
 
     // 3. Call Groq
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const response = await groqFetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
