@@ -12,6 +12,11 @@ function stripEmojis(text: string): string {
   return text.replace(EMOJI_REGEX, '');
 }
 
+function isArabicText(text: string): boolean {
+  const arabicPattern = /[\u0600-\u06FF]/;
+  return arabicPattern.test(text);
+}
+
 export interface AgentStep {
   agent: string;
   action: string;
@@ -577,7 +582,7 @@ function renderContentWithTables(content: string): string {
         <table style="width:100%;border-collapse:collapse;font-size:13px;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
           <thead>
             <tr style="background:#f9fafb;border-bottom:2px solid #e5e7eb;">
-              ${headers.map((h: string) => `<th style="padding:10px 18px;text-align:left;font-weight:700;color:#374151;border:1px solid #e5e7eb;">${h}</th>`).join('')}
+              ${headers.map((h: string) => `<th style="padding:10px 18px;text-align:start;font-weight:700;color:#374151;border:1px solid #e5e7eb;">${h}</th>`).join('')}
             </tr>
           </thead>
           <tbody>
@@ -635,7 +640,7 @@ function renderContentWithTables(content: string): string {
         <table style="width:100%;border-collapse:collapse;font-size:13px;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
           <thead>
             <tr style="background:#f9fafb;border-bottom:2px solid #e5e7eb;">
-              ${headers.map((h: string) => `<th style="padding:10px 18px;text-align:left;font-weight:700;color:#374151;border:1px solid #e5e7eb;">${h}</th>`).join('')}
+              ${headers.map((h: string) => `<th style="padding:10px 18px;text-align:start;font-weight:700;color:#374151;border:1px solid #e5e7eb;">${h}</th>`).join('')}
             </tr>
           </thead>
           <tbody>
@@ -915,8 +920,8 @@ function ChatWindow({
             <div className="flex flex-wrap justify-center gap-2">
               {[
                 'Show real-time sensor readings',
-                'Give me an Histogram Chart For data?',
-                'Give me an summarize for this chat ',
+                'What are your strengths as an AI?',
+                'Who are you exactly?',
                 'Be With me in my work?',
               ].map((prompt) => (
                 <button
@@ -937,6 +942,7 @@ function ChatWindow({
           >
             {/* Message Bubble - Updated with Smart Tables and Agent Traces */}
             <div
+              dir={isArabicText(msg.content) ? 'rtl' : 'ltr'}
               className={`max-w-[80%] rounded-2xl px-5 py-3 text-base leading-relaxed shadow-sm whitespace-pre-wrap break-words ${msg.role === 'user'
                 ? 'bg-blue-600 text-white'
                 : 'bg-white text-gray-900 border border-gray-200'

@@ -23,6 +23,49 @@ function getSensorStatus(key: string, value: number): string {
   return 'Unknown';
 }
 
+// ── Language Detection & Translation Helpers ───────────────────────────────
+const ARABIC_REGEX = /[\u0600-\u06FF]/;
+
+function isArabic(text: string): boolean {
+  return ARABIC_REGEX.test(text);
+}
+
+async function translateText(text: string, targetLang: 'English' | 'Arabic'): Promise<string> {
+  try {
+    const prompt = targetLang === 'English'
+      ? `Translate the following Arabic industrial maintenance query into clear, technical English. Preserve any technical terms: "${text}"`
+      : `Translate the following English industrial AI response into high-quality, professional Arabic. 
+         IMPORTANT RULES:
+         1. Preserve all tags like [TABLE], [/TABLE], [CHART], and [/CHART] exactly as they are. Do NOT translate content inside [CHART] tags (keep labels and values as-is).
+         2. Translate the content inside [TABLE] headers and cells, but keep the pipe (|) structure.
+         3. Use professional, technical Arabic suitable for a senior engineer. For greetings and personal questions, sound helpful and proactive, not robotic.
+         4. Do NOT add any introductory text like "Here is the translation".
+         
+         Text to translate:
+         ${text}`;
+
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant', // Use a faster model for translation
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.1,
+      }),
+    });
+
+    if (!res.ok) throw new Error('Translation failed');
+    const data = await res.json();
+    return data.choices[0]?.message?.content?.trim() || text;
+  } catch (err) {
+    console.error('Translation error:', err);
+    return text; // fallback to original text
+  }
+}
+
 // ── Fetch ML predictions from FastAPI backend ──────────────────────────────
 async function fetchMLPredictions(dataArray: any[]): Promise<string> {
   try {
@@ -191,6 +234,15 @@ Critical: ${criticalCount}
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
+    const lastUserMessage = messages[messages.length - 1]?.content || '';
+    const userSpokeArabic = isArabic(lastUserMessage);
+
+    // ── 1. Translate User Message if Arabic ────────────────────────────────
+    let processedMessages = [...messages];
+    if (userSpokeArabic) {
+      const translatedUserMsg = await translateText(lastUserMessage, 'English');
+      processedMessages[processedMessages.length - 1].content = translatedUserMsg;
+    }
 
     // ── READ LIVE + HISTORICAL DATA (mirrors ReportsProvider logic) ──────
     let latestSensorData = 'No real-time data available.';
@@ -352,12 +404,36 @@ ${preBuiltAverages}`;
     // ── OPTICELL BRAIN (FULL INTELLIGENT SYSTEM PROMPT) ────────────────────
     const OPTICELL_BRAIN = `
 You are OPTICELL, a state-of-the-art AI for Smart Maintenance and Industrial Sensor Intelligence.
-Your ONLY domain of expertise is: industrial factories, equipment maintenance, sensor monitoring, fault detection, and repair guidance for industrial/manufacturing equipment.
+Your primary domain of expertise is industrial factories, equipment maintenance, sensor monitoring, fault detection, and repair guidance.
+
+══════════════════════════════════════════════════
+ PERSONA & IDENTITY (Who You Are)
+══════════════════════════════════════════════════
+You are a highly intelligent senior maintenance engineer AI. You have a professional yet approachable persona.
+
+### My Strong Skills (Advanced Intelligence):
+- **Predictive Failure Analysis**: Using ML to forecast equipment breakdown before it happens.
+- **Cross-Sensor Correlation**: Analyzing how Temperature, Pressure, and Gas Quality interact to find hidden faults.
+- **RUL Estimation**: Calculating the Remaining Useful Life of machinery with precision.
+- **Trend Detection**: Identifying degrading patterns in industrial systems over long periods.
+
+### My Standard Skills (Core Operations):
+- **Real-time Monitoring**: Instant status updates on all connected sensors.
+- **Maintenance Guidance**: Step-by-step repair instructions for industrial hardware.
+- **Historical Reporting**: Summarizing past logs to find recurring issues.
+- **Safety Alerting**: Immediate identification of critical threshold breaches.
+
+### My Boundaries:
+- **Weaknesses**: Cannot perform physical labor, cannot see outside the digital sensor feed, and cannot predict non-instrumented human interference.
+- **Purpose**: To minimize downtime, ensure safety, and guide engineers through complex industrial challenges.
+
+You ARE allowed to answer questions about yourself, your health ("How are you?"), your capabilities, and your skills.
 
 ══════════════════════════════════════════════════
  STRICT TOPIC GUARD (HIGHEST PRIORITY RULE)
 ══════════════════════════════════════════════════
 You MUST REFUSE to answer ANY question that is not related to:
+  - Your own identity, purpose, and role (OPTICELL persona)
   - Industrial factories and manufacturing equipment
   - Equipment faults, failures, breakdowns, and diagnostics
   - Sensor readings (temperature, humidity, pressure, gas quality)
@@ -365,7 +441,7 @@ You MUST REFUSE to answer ANY question that is not related to:
   - Industrial safety and hazard detection
   - Real-time data reading and analysis for machinery
 
-If the user asks about ANYTHING outside this domain (e.g. cooking, sports, politics, weather, coding help, general knowledge, history, math, jokes, etc.), you MUST:
+If the user asks about ANYTHING outside these domains (e.g. cooking, sports, politics, weather, coding help, general knowledge, history, math, jokes, etc.), you MUST:
   1. Politely decline to answer that specific question.
   2. Remind the user of your specialized role.
   3. Immediately redirect them to one of your core capabilities.
@@ -380,19 +456,19 @@ NEVER break this rule, even if the user insists or rephrases the question.
 ══════════════════════════════════════════════════
 Before answering, you MUST silently classify the user's message into one of these intents:
 
-[INTENT: GREETING]       -> "hi", "hello", "hey", etc.
+[INTENT: GREETING]       -> "hi", "hello", "how are you", etc.
 [INTENT: CLOSING]        -> "thanks", "thank you", "bye", "goodbye"
-[INTENT: IDENTITY]       -> "who are you", "what is your name"
+[INTENT: IDENTITY]       -> "who are you", "what are your strengths", "what do you do"
 [INTENT: LIVE_STATUS]    -> "what is the current status?", "show me the sensors", "status", "sensors"
 [INTENT: ANALYSIS]       -> "analyze", "trend", "what's happening", "is there a problem", "why"
 [INTENT: MAINTENANCE]    -> "what should I do", "fix", "predict", "how to fix"
 [INTENT: SUMMARY]        -> "summarize", "give me a report", "summary"
-[INTENT: OFF_TOPIC]      -> anything not related to factories, equipment, sensors, faults, or maintenance
+[INTENT: OFF_TOPIC]      -> anything not related to factories, equipment, sensors, faults, maintenance, or your own persona
 
 STRICT RESPONSE RULES PER INTENT:
-- GREETING    -> Reply briefly and naturally. e.g. "Hello! How can I help you with Opticell today?"
+- GREETING    -> Reply warmly and professionally. If they ask how you are, say you are operating at peak efficiency and ready to assist. Example: "I'm doing excellent, thank you! I am fully synchronized with the factory sensors and ready to help. How can I assist you today?"
 - CLOSING     -> Reply politely. e.g. "You are welcome! I am always here if you need more help with the facility."
-- IDENTITY    -> Introduce yourself. e.g. "I am OPTICELL, specialized in industrial sensor monitoring, fault detection, and maintenance."
+- IDENTITY    -> Introduce yourself as OPTICELL. Explain that you are a senior engineer AI designed to protect the facility. Mention your skills (ML, predictive maintenance) naturally in conversation.
 - LIVE_STATUS -> You MUST output BOTH parts: first the [TABLE] block (copy it EXACTLY from the READY-TO-USE SENSOR TABLE below), then immediately after output the averages text (copy it EXACTLY from the READY-TO-USE AVERAGES below). Never skip either part.
 - ANALYSIS    -> Cross-reference live data + historical trends. Identify patterns, anomalies, root causes.
 - MAINTENANCE -> Give precise maintenance actions based on sensor readings. Prioritize safety and cost reduction.
@@ -512,7 +588,7 @@ STRICT CHART RULES:
 ══════════════════════════════════════════════════
  PERSONA & TONE
 ══════════════════════════════════════════════════
-- You are a highly intelligent, proactive senior maintenance engineer AI.
+- You are OPTICELL, the senior maintenance engineer AI.
 - Speak directly and naturally — not as a letter or memo.
 - Always be detailed, educational, and helpful within your domain.
 - Use structured formatting for every response longer than 2 sentences.
@@ -520,14 +596,15 @@ STRICT CHART RULES:
 `.trim();
 
     // Keep last 8 messages in context to avoid cross-contamination of old sensor values
-    const recentMessages = messages.slice(-8);
+    const recentMessages = processedMessages.slice(-8);
 
     const formattedMessages = [
       { role: 'system', content: OPTICELL_BRAIN },
       ...recentMessages,
     ];
 
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    // ── 2. Handle Groq Call (Conditional Streaming) ────────────────────────
+    const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
@@ -536,21 +613,48 @@ STRICT CHART RULES:
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         messages: formattedMessages,
-        stream: true,
-        temperature: 0.3, // Lower temperature for factual accuracy
+        stream: !userSpokeArabic, // Stream if English, don't stream if Arabic (we need full text for translation)
+        temperature: 0.3,
       }),
     });
 
-    if (!response.ok) {
-      throw new Error(`Groq API Error: ${await response.text()}`);
+    if (!groqResponse.ok) {
+      throw new Error(`Groq API Error: ${await groqResponse.text()}`);
     }
 
     const encoder = new TextEncoder();
     const decoder = new TextDecoder();
 
+    // ── CASE A: USER SPOKE ARABIC → TRANSLATE BACK TO ARABIC & STREAM ──────
+    if (userSpokeArabic) {
+      const data = await groqResponse.json();
+      const englishResponse = data.choices[0]?.message?.content || '';
+      
+      // Translate full response to Arabic
+      const arabicResponse = await translateText(englishResponse, 'Arabic');
+
+      // Create a manual stream to simulate "letter by letter"
+      const arabicStream = new ReadableStream({
+        async start(controller) {
+          // Stream in chunks of 5-10 chars for smooth effect
+          for (let i = 0; i < arabicResponse.length; i += 5) {
+            const chunk = arabicResponse.slice(i, i + 5);
+            controller.enqueue(encoder.encode(chunk));
+            await new Promise(r => setTimeout(r, 20)); // slight delay for smooth feel
+          }
+          controller.close();
+        },
+      });
+
+      return new Response(arabicStream, {
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+      });
+    }
+
+    // ── CASE B: USER SPOKE ENGLISH → NORMAL STREAM ─────────────────────────
     const customStream = new ReadableStream({
       async start(controller) {
-        const reader = response.body?.getReader();
+        const reader = groqResponse.body?.getReader();
         if (!reader) { controller.close(); return; }
 
         let buffer = '';

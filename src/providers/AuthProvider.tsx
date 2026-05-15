@@ -35,6 +35,30 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+const ALLOWED_EMAILS = [
+  'Shrifamazon@gmail.com',
+  'a.mohamed0238@gmail.com',
+  'Mohamed.aboelgoud.mh@gmail.com',
+  'oa741536@gmail.com',
+];
+
+const checkWhitelist = async (firebaseUser: User): Promise<boolean> => {
+  const email = firebaseUser.email;
+  if (!email || !ALLOWED_EMAILS.includes(email)) {
+    alert(`Access Forbidden: The email ${email || 'unknown'} is not authorized to access this platform. Your account will be removed.`);
+    try {
+      // Sign out and delete the unauthorized account immediately
+      await signOut(auth);
+      await firebaseUser.delete();
+    } catch (e) {
+      console.warn("Unauthorized user cleanup failed:", e);
+    }
+    window.location.replace('/login');
+    return false;
+  }
+  return true;
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -42,10 +66,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setUser(firebaseUser);
-      setLoading(true);
-
       if (firebaseUser) {
+        // Double check whitelist on state change for active sessions
+        const isAllowed = ALLOWED_EMAILS.includes(firebaseUser.email || '');
+        if (!isAllowed) {
+          await signOut(auth);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
+        setUser(firebaseUser);
+        setLoading(true);
+
         try {
           const docRef = doc(db, 'users', firebaseUser.uid);
           const docSnap = await getDoc(docRef);
@@ -89,6 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setProfile({ name: firebaseUser.displayName || '' });
         }
       } else {
+        setUser(null);
         setProfile(null);
 
         // --- UPDATED ROUTE CHECK STARTS HERE ---
@@ -108,7 +142,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      if (result.user) {
+        await checkWhitelist(result.user);
+      }
     } catch (error: any) {
       console.error("Google sign-in failed:", error);
       alert("Google sign-in failed: " + error.message);
@@ -117,7 +154,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithEmail = async (email: string, password: string) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      if (result.user) {
+        await checkWhitelist(result.user);
+      }
     } catch (error: any) {
       console.error("Email sign-in failed:", error);
       alert("Sign-in failed: " + (error.message || "Invalid credentials"));
@@ -125,6 +165,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUpWithEmail = async (email: string, password: string, name: string) => {
+    // PRE-CHECK Whitelist for signup
+    if (!ALLOWED_EMAILS.includes(email)) {
+      alert(`Forbidden: The email ${email} is not on the authorized list. You cannot create an account.`);
+      return;
+    }
+
     try {
       const { createUserWithEmailAndPassword } = await import('firebase/auth');
       const cred: UserCredential = await createUserWithEmailAndPassword(auth, email, password);
