@@ -629,7 +629,7 @@ STRICT CHART RULES:
     if (userSpokeArabic) {
       const data = await groqResponse.json();
       const englishResponse = data.choices[0]?.message?.content || '';
-      
+
       // Translate full response to Arabic
       const arabicResponse = await translateText(englishResponse, 'Arabic');
 

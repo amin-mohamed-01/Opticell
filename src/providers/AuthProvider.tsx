@@ -36,24 +36,28 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 const ALLOWED_EMAILS = [
-  'Shrifamazon@gmail.com',
+  'shrifamazon@gmail.com',
   'a.mohamed0238@gmail.com',
-  'Mohamed.aboelgoud.mh@gmail.com',
+  'mohamed.aboelgoud.mh@gmail.com',
   'oa741536@gmail.com',
-];
+  'rehamothman28874@gmail.com',
+  'hadeerkamal264@gmail.com',
+  'yousefsamehkhallaf@gmail.com',
+  'elgarhey1802@gmail.com',
+].map(email => email.toLowerCase());
 
 const checkWhitelist = async (firebaseUser: User): Promise<boolean> => {
-  const email = firebaseUser.email;
+  const email = firebaseUser.email?.toLowerCase();
   if (!email || !ALLOWED_EMAILS.includes(email)) {
-    alert(`Access Forbidden: The email ${email || 'unknown'} is not authorized to access this platform. Your account will be removed.`);
+    console.error(`Access Forbidden: ${email || 'unknown'} is not authorized.`);
     try {
-      // Sign out and delete the unauthorized account immediately
+      // Sign out and delete the unauthorized account immediately to keep Auth clean
       await signOut(auth);
       await firebaseUser.delete();
     } catch (e) {
       console.warn("Unauthorized user cleanup failed:", e);
     }
-    window.location.replace('/login');
+    window.location.replace('/access-denied');
     return false;
   }
   return true;
@@ -68,11 +72,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         // Double check whitelist on state change for active sessions
-        const isAllowed = ALLOWED_EMAILS.includes(firebaseUser.email || '');
+        const isAllowed = ALLOWED_EMAILS.includes(firebaseUser.email?.toLowerCase() || '');
         if (!isAllowed) {
           await signOut(auth);
           setUser(null);
           setLoading(false);
+          window.location.replace('/access-denied');
           return;
         }
 
@@ -166,7 +171,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUpWithEmail = async (email: string, password: string, name: string) => {
     // PRE-CHECK Whitelist for signup
-    if (!ALLOWED_EMAILS.includes(email)) {
+    if (!ALLOWED_EMAILS.includes(email.toLowerCase())) {
       alert(`Forbidden: The email ${email} is not on the authorized list. You cannot create an account.`);
       return;
     }
