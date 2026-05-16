@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import connectToDatabase from '@/lib/mongodb';
-import Reading from '@/models/Reading';
+import connectToSaveDatabase from '@/lib/mongodb-save';
+import mongoose from 'mongoose';
 import { groqFetch } from '@/lib/groq-fetch';
 
 const ML_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -151,8 +151,8 @@ function buildRAGContext(dataArray: any[]): string {
   };
 
   const rawLog = recent.slice(-5).map((r: any) => {
-    const time = new Date(r.timestamp).toLocaleTimeString();
-    return `[${time}] T:${r.data?.temprature}C, H:${r.data?.humidity}%, P:${r.data?.pressure}hPa, G:${r.data?.gas_quality}`;
+    const time = new Date(r._uploadedAt || r.timestamp).toLocaleTimeString();
+    return `[${time}] T:${r.data?.temprature || r.data?.temperature}C, H:${r.data?.humidity}%, P:${r.data?.pressure}hPa, G:${r.data?.gas_quality}`;
   }).join('\n');
 
   return `
@@ -252,12 +252,15 @@ export async function POST(req: Request) {
     let preBuiltCharts = '';
 
     try {
-      await connectToDatabase();
-      const dbReadings = await Reading.find({}).sort({ timestamp: -1 }).limit(100).lean();
+      const connection = await connectToSaveDatabase();
+      const UploadSchema = new mongoose.Schema({}, { strict: false, collection: 'uploads', versionKey: false });
+      const UploadModel = connection.models.Upload || connection.model('Upload', UploadSchema);
+      
+      const dbReadings = await UploadModel.find({}).sort({ _uploadedAt: -1 }).limit(100).lean();
 
       let dataArray: any[] = [];
       if (dbReadings && dbReadings.length > 0) {
-        dataArray = dbReadings.reverse(); // chronological order
+        dataArray = [...dbReadings].reverse(); // chronological order
       }
 
       if (dataArray.length === 0) {
@@ -283,7 +286,7 @@ export async function POST(req: Request) {
           const humidity = parseFloat(String(d.humidity ?? 0));
           const pressure = parseFloat(String(d.pressure ?? 102));
           const gas = parseFloat(String(d.gas_quality ?? d.gasQuality ?? 0));
-          const ts = row.timestamp ? new Date(row.timestamp).toLocaleTimeString() : 'N/A';
+          const ts = (row._uploadedAt || row.timestamp) ? new Date(row._uploadedAt || row.timestamp).toLocaleTimeString() : 'N/A';
 
           // Same threshold logic as ReportsProvider
           let status = 'Normal';
@@ -348,7 +351,7 @@ export async function POST(req: Request) {
 
         // ── Latest reading timestamp ────────────────────────────────────
         const latestFull = dataArray[dataArray.length - 1];
-        const latestTs = latestFull.timestamp ? new Date(latestFull.timestamp).toLocaleString() : 'Unknown';
+        const latestTs = (latestFull._uploadedAt || latestFull.timestamp) ? new Date(latestFull._uploadedAt || latestFull.timestamp).toLocaleString() : 'Unknown';
 
         // ── Per-row status log (last 5 rows for detail) ─────────────────
         const recentLog = rowReports.slice(-5).map(r =>
@@ -690,3 +693,4 @@ STRICT CHART RULES:
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+

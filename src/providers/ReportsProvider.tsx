@@ -105,7 +105,7 @@ export const ReportsProvider = ({ children }: { children: ReactNode }) => {
 
       const newReport: Report = {
         id: batchId,
-        timestamp: new Date(doc.timestamp ?? Date.now()).toISOString(),
+        timestamp: new Date(doc._uploadedAt ?? Date.now()).toISOString(),
         status,
         details,
         temp,
@@ -128,14 +128,15 @@ export const ReportsProvider = ({ children }: { children: ReactNode }) => {
 
     const startStreaming = async () => {
       try {
-        const res = await fetch(`/api/readings?t=${Date.now()}`);
+        const res = await fetch(`/api/db-save?limit=500&t=${Date.now()}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        let raw: Array<any> = await res.json();
+        const json = await res.json();
+        const raw = json.data;
         if (!mounted) return;
         if (!Array.isArray(raw)) return;
 
-        recordsToStream = raw.reverse();
+        recordsToStream = [...raw].reverse();
 
         // Initial batch to populate reports immediately
         const initialBatch = recordsToStream.slice(0, 15);

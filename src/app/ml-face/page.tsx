@@ -68,10 +68,11 @@ export default function MLFacePage() {
 
     try {
       // Step 1: Fetch latest readings from MongoDB via Next.js API
-      const readingsRes = await fetch(`/api/readings?t=${Date.now()}`);
+      const readingsRes = await fetch(`/api/db-save?limit=30&t=${Date.now()}`);
       if (!readingsRes.ok) throw new Error(`Failed to fetch readings: HTTP ${readingsRes.status}`);
 
-      const allReadings: Array<Record<string, unknown>> = await readingsRes.json();
+      const json = await readingsRes.json();
+      const allReadings = json.data;
       if (!Array.isArray(allReadings) || allReadings.length < HISTORY_WINDOW) {
         throw new Error(`Insufficient sensor data. Need ${HISTORY_WINDOW}, got ${allReadings?.length ?? 0}`);
       }

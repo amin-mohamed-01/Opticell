@@ -3,8 +3,8 @@ import fs from "fs";
 import path from "path";
 import { runMultiAgentPipeline } from "@/lib/langgraph/multiAgentGraph";
 import type { ChatMessage, SSEEvent } from "@/lib/langgraph/types";
-import connectToDatabase from "@/lib/mongodb";
-import Reading from "@/models/Reading";
+import connectToSaveDatabase from "@/lib/mongodb-save";
+import mongoose from "mongoose";
 
 const ML_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const REQUEST_TIMEOUT_MS = 120_000;
@@ -61,11 +61,14 @@ IMPORTANT: ML predictions override threshold rules. If ML says warning/critical,
 async function buildSensorContext(): Promise<string> {
   let dataArray: any[] = [];
   try {
-    await connectToDatabase();
-    const readings = await Reading.find({}).sort({ timestamp: -1 }).limit(100).lean();
+    const connection = await connectToSaveDatabase();
+    const UploadSchema = new mongoose.Schema({}, { strict: false, collection: 'uploads', versionKey: false });
+    const UploadModel = connection.models.Upload || connection.model('Upload', UploadSchema);
+    
+    const readings = await UploadModel.find({}).sort({ _uploadedAt: -1 }).limit(100).lean();
     if (readings && readings.length > 0) {
       // Reverse to get chronological order (oldest first, latest at the end)
-      dataArray = readings.reverse();
+      dataArray = [...readings].reverse();
     }
   } catch (err) {
     console.error("MongoDB fetch failed, falling back to JSON:", err);
@@ -86,7 +89,7 @@ async function buildSensorContext(): Promise<string> {
   try {
     const latest = dataArray[dataArray.length - 1];
     const d = latest.data || {};
-    const ts = latest.timestamp ? new Date(latest.timestamp).toLocaleString() : "Unknown";
+    const ts = (latest._uploadedAt || latest.timestamp) ? new Date(latest._uploadedAt || latest.timestamp).toLocaleString() : "Unknown";
     const tS = d.temprature != null ? getSensorStatus("temperature", d.temprature) : "N/A";
     const hS = d.humidity != null ? getSensorStatus("humidity", d.humidity) : "N/A";
     const pS = d.pressure != null ? getSensorStatus("pressure", d.pressure) : "N/A";
@@ -129,7 +132,7 @@ export async function POST(req: NextRequest) {
   const sensorContext = await buildSensorContext();
   const stream = new ReadableStream({
     async start(controller) {
-      const send = (event: SSEEvent) => { try { controller.enqueue(encoder.encode(encodeSSE(event))); } catch {} };
+      const send = (event: SSEEvent) => { try { controller.enqueue(encoder.encode(encodeSSE(event))); } catch { } };
       const timeoutId = setTimeout(() => { send({ type: "error", message: "Request timed out.", timestamp: Date.now() }); controller.close(); }, REQUEST_TIMEOUT_MS);
       try {
         const pipeline = runMultiAgentPipeline(sanitizedMessages, sensorContext);
@@ -157,4 +160,5 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   return NextResponse.json({ status: "ok", service: "opticell-multi-agent", model: "llama-3.1-8b-instant", agents: ["Supervisor", "Analyst", "Critic", "Synthesizer"], timestamp: new Date().toISOString() });
 }
+
 

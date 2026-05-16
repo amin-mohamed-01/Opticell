@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import connectToDatabase from '@/lib/mongodb';
-import Reading from '@/models/Reading';
+import connectToSaveDatabase from '@/lib/mongodb-save';
+import mongoose from 'mongoose';
 import { groqFetch } from '@/lib/groq-fetch';
 import { getDb } from '@/lib/postgres';
 
@@ -93,7 +93,7 @@ async function fetchMaintenanceReports(): Promise<string> {
       LIMIT 5
     `);
     if (result.rows.length === 0) return 'No human maintenance reports recorded.';
-    return result.rows.map(r => 
+    return result.rows.map(r =>
       `Report #${r.id} [${r.status.toUpperCase()} | ${r.priority.toUpperCase()}]: ${r.human_review} (${new Date(r.created_at).toLocaleDateString()})`
     ).join('\n');
   } catch (err) {
@@ -129,19 +129,26 @@ export async function POST(req: Request) {
     }
 
     // 2. Fetch Context (Mongo + Postgres + ML)
-    await connectToDatabase();
-    const dbReadings = await Reading.find({}).sort({ timestamp: -1 }).limit(20).lean();
-    
     let sensorData = 'No sensor data.';
     let mlContext = 'ML context unavailable.';
     let table = '';
-    
-    if (dbReadings.length > 0) {
-      const latest = dbReadings[0] as any;
-      const d = latest.data || {};
-      sensorData = `Latest Sensors: Temp=${d.temprature ?? 0}C, Hum=${d.humidity ?? 0}%, Press=${d.pressure ?? 102}hPa, Gas=${d.gas_quality ?? 0}.`;
-      table = formatSensorTable(d.temprature ?? 0, d.humidity ?? 0, d.pressure ?? 102, d.gas_quality ?? 0);
-      mlContext = await fetchMLPredictions(dbReadings.reverse());
+
+    try {
+      const connection = await connectToSaveDatabase();
+      const UploadSchema = new mongoose.Schema({}, { strict: false, collection: 'uploads', versionKey: false });
+      const UploadModel = connection.models.Upload || connection.model('Upload', UploadSchema);
+      
+      const dbReadings = await UploadModel.find({}).sort({ _uploadedAt: -1 }).limit(20).lean();
+
+      if (dbReadings.length > 0) {
+        const latest = dbReadings[0] as any;
+        const d = latest.data || {};
+        sensorData = `Latest Sensors: Temp=${d.temprature ?? d.temperature ?? 0}C, Hum=${d.humidity ?? 0}%, Press=${d.pressure ?? 102}hPa, Gas=${d.gas_quality ?? 0}.`;
+        table = formatSensorTable(d.temprature ?? d.temperature ?? 0, d.humidity ?? 0, d.pressure ?? 102, d.gas_quality ?? 0);
+        mlContext = await fetchMLPredictions([...dbReadings].reverse());
+      }
+    } catch (err) {
+      console.error('External Chat Mongo Error:', err);
     }
 
     const reportsContext = await fetchMaintenanceReports();
@@ -180,7 +187,7 @@ STRICT PERSONA RULES:
       const data = await groqResponse.json();
       const engResp = data.choices[0]?.message?.content || '';
       const araResp = await translateText(engResp, 'Arabic');
-      
+
       const stream = new ReadableStream({
         async start(controller) {
           for (let i = 0; i < araResp.length; i += 5) {
@@ -211,7 +218,7 @@ STRICT PERSONA RULES:
                 const data = JSON.parse(line.trim().slice(6));
                 const content = data.choices[0]?.delta?.content;
                 if (content) controller.enqueue(encoder.encode(content));
-              } catch {}
+              } catch { }
             }
           }
         }
@@ -226,4 +233,5 @@ STRICT PERSONA RULES:
     return NextResponse.json({ error: 'Failed', details: error.message }, { status: 500, headers: getCorsHeaders() });
   }
 }
+
 

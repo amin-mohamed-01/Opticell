@@ -80,7 +80,7 @@ export function calculateHealthScore(d: SensorData): number {
 function parseReading(doc: {
   sensorId?: number;
   data?: Record<string, number | string>;
-  timestamp?: string;
+  _uploadedAt?: string;
 }): SensorData | null {
   if (!doc.data) return null;
 
@@ -98,7 +98,7 @@ function parseReading(doc: {
   if (isNaN(temperature) || isNaN(humidity)) return null;
 
   return {
-    timestamp: new Date(doc.timestamp ?? Date.now()).toISOString(),
+    timestamp: new Date(doc._uploadedAt ?? Date.now()).toISOString(),
     temperature: temperature as number,
     humidity,
     pressure: isNaN(pressure) ? 102 : pressure,
@@ -164,15 +164,16 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
     const startStreaming = async () => {
       try {
-        const res = await fetch(`/api/readings?t=${Date.now()}`);
+        const res = await fetch(`/api/db-save?limit=500&t=${Date.now()}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        let raw: Array<any> = await res.json();
+        const json = await res.json();
+        const raw = json.data;
         if (!mounted) return;
         if (!Array.isArray(raw) || raw.length === 0) return;
 
-        // /api/readings returns newest first. Reverse to chronological order for charts.
-        recordsToStream = raw.reverse();
+        // /api/db-save returns newest first (DESC). Reverse to chronological order for charts.
+        recordsToStream = [...raw].reverse();
 
         // Push the first 15 instantly so the dashboard isn't completely empty
         const initialBatch = recordsToStream.slice(0, 15);
