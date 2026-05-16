@@ -77,30 +77,19 @@ export default function MLFacePage() {
         throw new Error(errJson.error || `Prediction failed: HTTP ${res.status}`);
       }
 
-      const data = await res.json();
-      
-      if (!data.prediction) {
-        console.error('Invalid API response:', data);
-        throw new Error('ML API returned invalid data format. Check backend logs.');
-      }
-
-      const { prediction, latest_reading } = data;
+      const { prediction, latest_reading } = await res.json();
       const { predicted_label, predicted_rul } = prediction;
 
       // Update UI state
-      setPredictedLabel(predicted_label || 'normal');
-      setPredictedRul(predicted_rul ?? null);
+      setPredictedLabel(predicted_label);
+      setPredictedRul(predicted_rul);
       setFaceState(LABEL_TO_FACE[predicted_label] || 'normal');
       setLastUpdate(new Date().toLocaleTimeString());
       setCurrentReading(latest_reading?.data || null);
 
     } catch (err) {
-      console.error('Prediction Loop Error:', err);
       const msg = err instanceof Error ? err.message : 'Prediction failed';
       setError(msg);
-      
-      // Reset prediction state on error to avoid showing stale/broken data
-      setPredictedLabel(null);
     } finally {
       setLoading(false);
     }
@@ -187,10 +176,10 @@ export default function MLFacePage() {
 
               {/* Raw Data HUD */}
               {currentReading && (
-                <div 
-                  style={{ 
-                    marginTop: '12px', 
-                    paddingTop: '12px', 
+                <div
+                  style={{
+                    marginTop: '12px',
+                    paddingTop: '12px',
                     borderTop: '1px solid #E5E7EB',
                     display: 'grid',
                     gridTemplateColumns: '1fr 1fr',

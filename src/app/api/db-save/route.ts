@@ -76,10 +76,29 @@ export async function GET(req: NextRequest) {
       count: uploads.length,
       data: uploads
     }, { headers: getCorsHeaders() });
+
   } catch (error: any) {
-    console.error('❌ Error fetching from db-save:', error);
+    console.error('⚠️ db-save primary cluster failed, attempting fallback to main readings...', error.message);
+    
+    try {
+      // FALLBACK: Try to get data from the main readings collection
+      // This ensures the dashboard always has "Real Data" even if the specialized cluster is down
+      const mainRes = await fetch(`${req.nextUrl.origin}/api/readings?t=${Date.now()}`);
+      if (mainRes.ok) {
+        const readings = await mainRes.json();
+        return NextResponse.json({
+          status: 'success',
+          source: 'fallback-readings',
+          count: readings.length,
+          data: readings
+        }, { headers: getCorsHeaders() });
+      }
+    } catch (fallbackError) {
+      console.error('❌ Fallback also failed:', fallbackError);
+    }
+
     return NextResponse.json({ 
-      error: 'Failed to fetch data', 
+      error: 'Failed to fetch data from all sources', 
       details: error.message 
     }, { status: 500, headers: getCorsHeaders() });
   }
