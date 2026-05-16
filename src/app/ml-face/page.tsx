@@ -187,16 +187,16 @@ export default function MLFacePage() {
                   }}
                 >
                   <div style={{ fontSize: '0.65rem', color: '#6B7280' }}>
-                    Temp: <strong style={{ color: '#374151' }}>{(currentReading.temperature || currentReading.temprature || 0).toFixed(1)}°C</strong>
+                    Temp: <strong style={{ color: '#374151' }}>{(currentReading.temperature ?? currentReading.temprature ?? 0).toFixed(1)}°C</strong>
                   </div>
                   <div style={{ fontSize: '0.65rem', color: '#6B7280' }}>
-                    Hum: <strong style={{ color: '#374151' }}>{(currentReading.humidity || 0).toFixed(1)}%</strong>
+                    Hum: <strong style={{ color: '#374151' }}>{(currentReading.humidity ?? 0).toFixed(1)}%</strong>
                   </div>
                   <div style={{ fontSize: '0.65rem', color: '#6B7280' }}>
-                    Press: <strong style={{ color: '#374151' }}>{(currentReading.pressure || 102).toFixed(1)}</strong>
+                    Press: <strong style={{ color: '#374151' }}>{(currentReading.pressure ?? 102).toFixed(1)}</strong>
                   </div>
                   <div style={{ fontSize: '0.65rem', color: '#6B7280' }}>
-                    Gas: <strong style={{ color: '#374151' }}>{currentReading.gas_quality || currentReading.gasQuality || 0}</strong>
+                    Gas: <strong style={{ color: '#374151' }}>{currentReading.gas_quality ?? currentReading.gasQuality ?? 0}</strong>
                   </div>
                 </div>
               )}

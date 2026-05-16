@@ -77,7 +77,7 @@ async function fetchMLPredictions(dataArray: any[]): Promise<string> {
     const history = dataArray.map((r: any) => {
       const d = r.data || {};
       return {
-        temprature: d.temprature ?? d.temperature ?? 0,
+        temperature: d.temperature ?? d.temprature ?? 0,
         humidity: d.humidity ?? 0,
         pressure: d.pressure ?? 102,
         gas_quality: d.gas_quality ?? d.gasQuality ?? 0,
@@ -152,7 +152,7 @@ function buildRAGContext(dataArray: any[]): string {
 
   const rawLog = recent.slice(-5).map((r: any) => {
     const time = new Date(r._uploadedAt || r.timestamp).toLocaleTimeString();
-    return `[${time}] T:${r.data?.temprature || r.data?.temperature}C, H:${r.data?.humidity}%, P:${r.data?.pressure}hPa, G:${r.data?.gas_quality}`;
+    return `[${time}] T:${r.data?.temperature ?? r.data?.temprature}C, H:${r.data?.humidity}%, P:${r.data?.pressure}hPa, G:${r.data?.gas_quality ?? r.data?.gasQuality}`;
   }).join('\n');
 
   return `
