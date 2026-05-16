@@ -58,6 +58,7 @@ export default function MLFacePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
+  const [currentReading, setCurrentReading] = useState<any>(null);
   const [pollActive, setPollActive] = useState(true);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -114,6 +115,7 @@ export default function MLFacePage() {
       setPredictedRul(predicted_rul);
       setFaceState(LABEL_TO_FACE[predicted_label] || 'normal');
       setLastUpdate(new Date().toLocaleTimeString());
+      setCurrentReading(allReadings[0]?.data || null);
 
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Prediction failed';
@@ -199,6 +201,33 @@ export default function MLFacePage() {
               {lastUpdate && (
                 <div style={{ fontSize: '0.68rem', color: '#9CA3AF' }}>
                   Last update: {lastUpdate}
+                </div>
+              )}
+
+              {/* Raw Data HUD */}
+              {currentReading && (
+                <div 
+                  style={{ 
+                    marginTop: '12px', 
+                    paddingTop: '12px', 
+                    borderTop: '1px solid #E5E7EB',
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '8px'
+                  }}
+                >
+                  <div style={{ fontSize: '0.65rem', color: '#6B7280' }}>
+                    Temp: <strong style={{ color: '#374151' }}>{(currentReading.temperature || currentReading.temprature || 0).toFixed(1)}°C</strong>
+                  </div>
+                  <div style={{ fontSize: '0.65rem', color: '#6B7280' }}>
+                    Hum: <strong style={{ color: '#374151' }}>{(currentReading.humidity || 0).toFixed(1)}%</strong>
+                  </div>
+                  <div style={{ fontSize: '0.65rem', color: '#6B7280' }}>
+                    Press: <strong style={{ color: '#374151' }}>{(currentReading.pressure || 102).toFixed(1)}</strong>
+                  </div>
+                  <div style={{ fontSize: '0.65rem', color: '#6B7280' }}>
+                    Gas: <strong style={{ color: '#374151' }}>{currentReading.gas_quality || currentReading.gasQuality || 0}</strong>
+                  </div>
                 </div>
               )}
             </>
