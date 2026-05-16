@@ -20,48 +20,12 @@ export async function OPTIONS() {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const sensorId = searchParams.get('sensorId');
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const numPredictions = searchParams.get('num_predictions') || '20';
 
-    // 1. Connect to MongoDB
-    const connection = await connectToSaveDatabase();
-    const UploadSchema = new mongoose.Schema({}, { strict: false, collection: 'uploads', versionKey: false });
-    const UploadModel = connection.models.Upload || connection.model('Upload', UploadSchema);
-
-    // 2. Fetch readings (Sequence needs at least 15 for a single window)
-    let query = {};
-    if (sensorId) {
-      query = { sensorId: parseInt(sensorId) || sensorId };
-    }
-
-    const rawReadings = await UploadModel.find(query)
-      .sort({ _uploadedAt: -1 })
-      .limit(limit);
-
-    if (!rawReadings || rawReadings.length < 15) {
-      return NextResponse.json({
-        error: 'Insufficient sensor data',
-        count: rawReadings?.length ?? 0,
-        message: 'Need at least 15 readings for sequence prediction.'
-      }, { status: 400, headers: getCorsHeaders() });
-    }
-
-    // 3. Format history (Oldest -> Newest)
-    const history = rawReadings.map((doc: any) => {
-      const d = doc.data || {};
-      return {
-        temprature: d.temprature ?? d.temperature ?? 0,
-        humidity: d.humidity ?? 0,
-        pressure: d.pressure ?? 102,
-        gas_quality: d.gas_quality ?? d.gasQuality ?? 0,
-      };
-    }).reverse();
-
-    // 4. Send to ML Backend (/predict-sequence)
-    const mlRes = await fetch(`${ML_BACKEND_URL}/predict-sequence`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ history, num_predictions: 20 }),
+    // Call the new pull-based sequence endpoint on the ML backend
+    const mlRes = await fetch(`${ML_BACKEND_URL}/predict-sequence-latest?num_predictions=${numPredictions}&t=${Date.now()}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
     });
 
     if (!mlRes.ok) {
@@ -73,11 +37,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      ...sequenceResult,
-      info: {
-        readings_used: rawReadings.length,
-        sensorId: sensorId || 'all'
-      }
+      ...sequenceResult
     }, { headers: getCorsHeaders() });
 
   } catch (error: any) {
