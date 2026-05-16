@@ -63,59 +63,29 @@ export default function MLFacePage() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // ── Core prediction function ──────────────────────────────────────
+  // ── Core prediction function ──────────────────────────────────────
   const runPrediction = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      // Step 1: Fetch latest readings from MongoDB via Next.js API
-      const readingsRes = await fetch(`/api/db-save?limit=30&t=${Date.now()}`);
-      if (!readingsRes.ok) throw new Error(`Failed to fetch readings: HTTP ${readingsRes.status}`);
-
-      const json = await readingsRes.json();
-      const allReadings = json.data;
-      if (!Array.isArray(allReadings) || allReadings.length < HISTORY_WINDOW) {
-        throw new Error(`Insufficient sensor data. Need ${HISTORY_WINDOW}, got ${allReadings?.length ?? 0}`);
+      // Fetch centralized prediction from Next.js API
+      // This endpoint handles MongoDB connection and ML Backend communication
+      const res = await fetch(`/api/ml/predict?t=${Date.now()}`);
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || `Prediction failed: HTTP ${res.status}`);
       }
 
-      // Step 2: Take the latest N readings, reverse to chronological (oldest → newest)
-      //         /api/readings returns newest-first, but rolling stats need chronological order
-      const window = allReadings.slice(0, HISTORY_WINDOW).reverse();
+      const { prediction, latest_reading } = await res.json();
+      const { predicted_label, predicted_rul } = prediction;
 
-      // Step 3: Flatten sensor data for FastAPI
-      //         MongoDB format: { data: { temprature, humidity, pressure, gas_quality } }
-      //         FastAPI expects: [{ temprature, humidity, pressure, gas_quality }, ...]
-      const history = window.map((r: Record<string, unknown>) => {
-        const data = r.data as Record<string, unknown> | undefined;
-        if (!data) return {};
-        return {
-          temprature: data.temprature ?? data.temperature ?? 0,
-          humidity: data.humidity ?? 0,
-          pressure: data.pressure ?? 102,
-          gas_quality: data.gas_quality ?? data.gasQuality ?? 0,
-        };
-      });
-
-      // Step 4: POST to FastAPI /predict
-      const predRes = await fetch(`${API_URL}/predict`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ history }),
-      });
-
-      if (!predRes.ok) {
-        const errBody = await predRes.json().catch(() => ({}));
-        throw new Error(errBody.detail || `Prediction failed: HTTP ${predRes.status}`);
-      }
-
-      const { predicted_label, predicted_rul } = await predRes.json();
-
-      // Step 5: Update UI state
+      // Update UI state
       setPredictedLabel(predicted_label);
       setPredictedRul(predicted_rul);
       setFaceState(LABEL_TO_FACE[predicted_label] || 'normal');
       setLastUpdate(new Date().toLocaleTimeString());
-      setCurrentReading(allReadings[0]?.data || null);
+      setCurrentReading(latest_reading?.data || null);
 
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Prediction failed';
