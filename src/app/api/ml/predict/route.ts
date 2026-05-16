@@ -33,16 +33,32 @@ export async function GET(req: NextRequest) {
 
     const result = await mlRes.json();
 
-    return NextResponse.json({
+    // Check if the result already has the 'prediction' wrapper (new format)
+    // If not, wrap it to maintain compatibility with the frontend
+    const finalResponse = result.prediction ? {
       success: true,
       ...result
-    }, { headers: getCorsHeaders() });
+    } : {
+      success: true,
+      prediction: {
+        predicted_label: result.predicted_label,
+        predicted_rul: result.predicted_rul
+      },
+      latest_reading: result.latest_reading || null,
+      ...result
+    };
+
+    return NextResponse.json(finalResponse, { headers: getCorsHeaders() });
 
   } catch (error: any) {
     console.error('❌ ML Prediction Route Error:', error);
+    
+    // Provide a more descriptive error for the frontend
     return NextResponse.json({
       error: 'Prediction failed',
-      details: error.message
+      message: error.message,
+      details: error.stack,
+      hint: 'Verify that the ML Backend is running at ' + (process.env.NEXT_PUBLIC_API_URL || 'the default HF Space URL')
     }, { status: 500, headers: getCorsHeaders() });
   }
 }

@@ -77,19 +77,30 @@ export default function MLFacePage() {
         throw new Error(errJson.error || `Prediction failed: HTTP ${res.status}`);
       }
 
-      const { prediction, latest_reading } = await res.json();
+      const data = await res.json();
+      
+      if (!data.prediction) {
+        console.error('Invalid API response:', data);
+        throw new Error('ML API returned invalid data format. Check backend logs.');
+      }
+
+      const { prediction, latest_reading } = data;
       const { predicted_label, predicted_rul } = prediction;
 
       // Update UI state
-      setPredictedLabel(predicted_label);
-      setPredictedRul(predicted_rul);
+      setPredictedLabel(predicted_label || 'normal');
+      setPredictedRul(predicted_rul ?? null);
       setFaceState(LABEL_TO_FACE[predicted_label] || 'normal');
       setLastUpdate(new Date().toLocaleTimeString());
       setCurrentReading(latest_reading?.data || null);
 
     } catch (err) {
+      console.error('Prediction Loop Error:', err);
       const msg = err instanceof Error ? err.message : 'Prediction failed';
       setError(msg);
+      
+      // Reset prediction state on error to avoid showing stale/broken data
+      setPredictedLabel(null);
     } finally {
       setLoading(false);
     }
