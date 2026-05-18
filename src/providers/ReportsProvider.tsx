@@ -83,14 +83,17 @@ export const ReportsProvider = ({ children }: { children: ReactNode }) => {
   const emailEnabledRef = useRef(emailReports);
   const prevLengthRef = useRef(0);
   const reportCounterRef = useRef(0);
+  const lastProcessedTimeRef = useRef<string | null>(null);
 
   useEffect(() => { emailEnabledRef.current = emailReports; }, [emailReports]);
 
   useEffect(() => {
     let mounted = true;
+    let streamTimer: NodeJS.Timeout;
+    let pollTimer: NodeJS.Timeout;
+
     let recordsToStream: any[] = [];
     let currentIndex = 0;
-    let streamTimer: NodeJS.Timeout;
 
     const processRow = (doc: any) => {
       if (!doc.data) return;
@@ -126,9 +129,11 @@ export const ReportsProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
-    const startStreaming = async () => {
+    const fetchLatestData = async (isInitial = false) => {
       try {
-        const res = await fetch(`/api/db-save?limit=500&t=${Date.now()}`);
+        const res = await fetch(`/api/db-save?limit=100&t=${Date.now()}`, {
+          cache: 'no-store'
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const json = await res.json();
@@ -136,40 +141,62 @@ export const ReportsProvider = ({ children }: { children: ReactNode }) => {
         if (!mounted) return;
         if (!Array.isArray(raw)) return;
 
-        recordsToStream = [...raw].reverse();
+        const fetchedRecords = [...raw].reverse();
 
-        // Initial batch to populate reports immediately
-        const initialBatch = recordsToStream.slice(0, 15);
-        currentIndex = 15;
-
-        for (const doc of initialBatch) {
-          processRow(doc);
+        if (isInitial) {
+          recordsToStream = fetchedRecords;
+          const initialBatch = recordsToStream.slice(0, 15);
+          currentIndex = 15;
+          for (const doc of initialBatch) {
+            processRow(doc);
+          }
+          setLoading(false);
+          setError(null);
+        } else {
+          const existingIds = new Set(recordsToStream.map(r => r._id));
+          const newRecords = fetchedRecords.filter(r => !existingIds.has(r._id));
+          
+          if (newRecords.length > 0) {
+            recordsToStream.push(...newRecords);
+          }
         }
+      } catch (err) {
+        if (isInitial && mounted) {
+          const msg = err instanceof Error ? err.message : 'Failed to load data';
+          setError(msg);
+          setLoading(false);
+        }
+      }
+    };
 
-        setLoading(false);
-        setError(null);
+    const runStream = async () => {
+      await fetchLatestData(true);
 
-        // Add a new row every 300ms to simulate fast real-time stream
-        streamTimer = setInterval(() => {
+      // Playback report rows every 300ms for fast responsive animation
+      streamTimer = setInterval(() => {
+        if (recordsToStream.length > 0) {
           if (currentIndex < recordsToStream.length) {
             processRow(recordsToStream[currentIndex]);
             currentIndex++;
           } else {
             currentIndex = 0;
           }
-        }, 300);
+        }
+      }, 300);
 
-      } catch (err) {
-        if (!mounted) return;
-        const msg = err instanceof Error ? err.message : 'Failed to load data';
-        setError(msg);
-        setLoading(false);
-      }
+      // Poll background database every 4 seconds
+      pollTimer = setInterval(() => {
+        fetchLatestData(false);
+      }, 4000);
     };
 
-    startStreaming();
+    runStream();
 
-    return () => { mounted = false; clearInterval(streamTimer); };
+    return () => {
+      mounted = false;
+      clearInterval(streamTimer);
+      clearInterval(pollTimer);
+    };
   }, []);
 
   return (

@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import Reading from '@/models/Reading';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const headers = {
+  'Cache-Control': 'no-store, max-age=0, must-revalidate'
+};
+
 // GET /api/readings — Return latest 100 readings sorted by timestamp DESC
 export async function GET() {
   try {
@@ -10,10 +17,10 @@ export async function GET() {
       .sort({ timestamp: -1 })
       .limit(100)
       .lean();
-    return NextResponse.json(readings, { status: 200 });
+    return NextResponse.json(readings, { status: 200, headers });
   } catch (error) {
     console.error('[GET /api/readings]', error);
-    return NextResponse.json({ error: 'Failed to fetch readings' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch readings' }, { status: 500, headers });
   }
 }
 
@@ -29,7 +36,7 @@ export async function POST(req: NextRequest) {
     ) {
       return NextResponse.json(
         { error: 'Invalid payload. Expected: { sensorId: number, data: object }' },
-        { status: 400 }
+        { status: 400, headers }
       );
     }
 
@@ -41,9 +48,9 @@ export async function POST(req: NextRequest) {
       timestamp: new Date(),
     });
 
-    return NextResponse.json(reading, { status: 201 });
+    return NextResponse.json(reading, { status: 201, headers });
   } catch (error) {
     console.error('[POST /api/readings]', error);
-    return NextResponse.json({ error: 'Failed to save reading' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to save reading' }, { status: 500, headers });
   }
 }

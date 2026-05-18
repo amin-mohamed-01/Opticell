@@ -116,12 +116,15 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [loadingError, setLoadingError] = useState<string | null>(null);
 
   const reportCounterRef = useRef<number>(0);
+  const lastProcessedTimeRef = useRef<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
+    let streamTimer: NodeJS.Timeout;
+    let pollTimer: NodeJS.Timeout;
+
     let recordsToStream: any[] = [];
     let currentIndex = 0;
-    let streamTimer: NodeJS.Timeout;
 
     const processRow = (doc: any) => {
       const row = parseReading(doc);
@@ -131,15 +134,16 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         hour: '2-digit', minute: '2-digit', second: '2-digit',
       });
 
-      setChartData((prev) =>
-        [...prev, {
+      setChartData((prev) => {
+        return [...prev, {
           time: timeLabel,
           temperature: row.temperature,
           humidity: row.humidity,
           pressure: row.pressure,
           gasQuality: row.gasQuality,
-        }].slice(-30)
-      );
+        }].slice(-30);
+      });
+      
       setLatestData(row);
       setCurrentStatus(calculateHealthScore(row));
 
@@ -162,9 +166,11 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    const startStreaming = async () => {
+    const fetchLatestData = async (isInitial = false) => {
       try {
-        const res = await fetch(`/api/db-save?limit=500&t=${Date.now()}`);
+        const res = await fetch(`/api/db-save?limit=100&t=${Date.now()}`, {
+          cache: 'no-store'
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const json = await res.json();
@@ -172,41 +178,64 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         if (!mounted) return;
         if (!Array.isArray(raw) || raw.length === 0) return;
 
-        // /api/db-save returns newest first (DESC). Reverse to chronological order for charts.
-        recordsToStream = [...raw].reverse();
+        // Sort chronologically (oldest first)
+        const fetchedRecords = [...raw].reverse();
 
-        // Push the first 15 instantly so the dashboard isn't completely empty
-        const initialBatch = recordsToStream.slice(0, 15);
-        currentIndex = 15;
-
-        for (const doc of initialBatch) {
-          processRow(doc);
+        if (isInitial) {
+          recordsToStream = fetchedRecords;
+          // Push first 15 instantly
+          const initialBatch = recordsToStream.slice(0, 15);
+          currentIndex = 15;
+          for (const doc of initialBatch) {
+            processRow(doc);
+          }
+          setLoadingError(null);
+        } else {
+          // Merge new records based on _id
+          const existingIds = new Set(recordsToStream.map(r => r._id));
+          const newRecords = fetchedRecords.filter(r => !existingIds.has(r._id));
+          
+          if (newRecords.length > 0) {
+            recordsToStream.push(...newRecords);
+          }
         }
+      } catch (err) {
+        if (isInitial && mounted) {
+          const msg = err instanceof Error ? err.message : 'Failed to read data';
+          setLoadingError(msg);
+        }
+      }
+    };
 
-        // Add a new row every 300ms to simulate fast real-time stream
-        streamTimer = setInterval(() => {
+    const runStream = async () => {
+      // 1. Initial history load
+      await fetchLatestData(true);
+
+      // 2. Continuous chart stream every 300ms for fast responsive animation
+      streamTimer = setInterval(() => {
+        if (recordsToStream.length > 0) {
           if (currentIndex < recordsToStream.length) {
             processRow(recordsToStream[currentIndex]);
             currentIndex++;
           } else {
-            // loop back to the beginning of the stream when we run out
+            // Loop back to keep flowing visually, but keep playing new sync records
             currentIndex = 0;
           }
-        }, 300);
+        }
+      }, 300);
 
-        setLoadingError(null);
-      } catch (err) {
-        if (!mounted) return;
-        const msg = err instanceof Error ? err.message : 'Failed to read data';
-        setLoadingError(msg);
-      }
+      // 3. Background Atlas database sync every 4 seconds
+      pollTimer = setInterval(() => {
+        fetchLatestData(false);
+      }, 4000);
     };
 
-    startStreaming();
+    runStream();
 
     return () => {
       mounted = false;
       clearInterval(streamTimer);
+      clearInterval(pollTimer);
     };
   }, []);
 

@@ -2,12 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToSaveDatabase from '@/lib/mongodb-save';
 import mongoose from 'mongoose';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // CORS Headers for public API access
 function getCorsHeaders() {
   return {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, DELETE',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Cache-Control': 'no-store, max-age=0, must-revalidate',
   };
 }
 
