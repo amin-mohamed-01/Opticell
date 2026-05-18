@@ -81,19 +81,14 @@ export const ReportsProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
 
   const emailEnabledRef = useRef(emailReports);
-  const prevLengthRef = useRef(0);
   const reportCounterRef = useRef(0);
-  const lastProcessedTimeRef = useRef<string | null>(null);
+  const lastIdRef = useRef<string | null>(null);
 
   useEffect(() => { emailEnabledRef.current = emailReports; }, [emailReports]);
 
   useEffect(() => {
     let mounted = true;
     let streamTimer: NodeJS.Timeout;
-    let pollTimer: NodeJS.Timeout;
-
-    let recordsToStream: any[] = [];
-    let currentIndex = 0;
 
     const processRow = (doc: any) => {
       if (!doc.data) return;
@@ -129,73 +124,39 @@ export const ReportsProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
-    const fetchLatestData = async (isInitial = false) => {
+    // Fetch the very next document from the cursor API
+    const fetchNext = async () => {
       try {
-        const res = await fetch(`/api/db-save?limit=100&t=${Date.now()}`, {
-          cache: 'no-store'
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const url = lastIdRef.current
+          ? `/api/stream?after=${lastIdRef.current}&t=${Date.now()}`
+          : `/api/stream?t=${Date.now()}`;
+
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) return;
 
         const json = await res.json();
-        const raw = json.data;
         if (!mounted) return;
-        if (!Array.isArray(raw)) return;
 
-        const fetchedRecords = [...raw].reverse();
-
-        if (isInitial) {
-          recordsToStream = fetchedRecords;
-          const initialBatch = recordsToStream.slice(0, 15);
-          currentIndex = 15;
-          for (const doc of initialBatch) {
-            processRow(doc);
-          }
+        if (json.data) {
+          // New document received — advance cursor, render it
+          lastIdRef.current = json.data._id;
+          processRow(json.data);
           setLoading(false);
           setError(null);
-        } else {
-          const existingIds = new Set(recordsToStream.map(r => r._id));
-          const newRecords = fetchedRecords.filter(r => !existingIds.has(r._id));
-          
-          if (newRecords.length > 0) {
-            recordsToStream.push(...newRecords);
-          }
         }
+        // json.data === null → no new data, stay idle, retry next tick
       } catch (err) {
-        if (isInitial && mounted) {
-          const msg = err instanceof Error ? err.message : 'Failed to load data';
-          setError(msg);
-          setLoading(false);
-        }
+        console.error('[ReportsStream] fetch error:', err);
       }
     };
 
-    const runStream = async () => {
-      await fetchLatestData(true);
-
-      // Playback report rows every 300ms for fast responsive animation
-      streamTimer = setInterval(() => {
-        if (recordsToStream.length > 0) {
-          if (currentIndex < recordsToStream.length) {
-            processRow(recordsToStream[currentIndex]);
-            currentIndex++;
-          } else {
-            currentIndex = 0;
-          }
-        }
-      }, 300);
-
-      // Poll background database every 4 seconds
-      pollTimer = setInterval(() => {
-        fetchLatestData(false);
-      }, 4000);
-    };
-
-    runStream();
+    // Start immediately, then every 300ms
+    fetchNext();
+    streamTimer = setInterval(fetchNext, 300);
 
     return () => {
       mounted = false;
       clearInterval(streamTimer);
-      clearInterval(pollTimer);
     };
   }, []);
 
