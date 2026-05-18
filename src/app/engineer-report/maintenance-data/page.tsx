@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
-import { Database, Filter, Plus, X, AlertTriangle, Pencil } from 'lucide-react';
+import { Database, Filter, Plus, X, AlertTriangle, Pencil, Trash2 } from 'lucide-react';
 
 type DataEntry = {
   id: number;
@@ -35,6 +35,10 @@ export default function MaintenanceDataPage() {
   const [fetching, setFetching] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
   const [search, setSearch]   = useState('');
+
+  // Delete confirm state
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Modal / editing state
   const [isModalOpen, setIsModalOpen]     = useState(false);
@@ -121,6 +125,24 @@ export default function MaintenanceDataPage() {
       alert(`Error: ${err.message}`);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (deletingId === null) return;
+    setDeleteLoading(true);
+    try {
+      const res = await fetch(`/api/maintenance-data?id=${deletingId}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to delete record');
+      }
+      await fetchData();
+    } catch (err: any) {
+      alert(`Error: ${err.message}`);
+    } finally {
+      setDeleteLoading(false);
+      setDeletingId(null);
     }
   };
 
@@ -254,14 +276,24 @@ export default function MaintenanceDataPage() {
                       </td>
                       {/* ── Actions ── */}
                       <td className="px-5 py-4">
-                        <button
-                          onClick={() => openEditModal(d)}
-                          title="Edit record"
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-semibold text-purple-700 hover:bg-purple-100 hover:border-purple-300 transition"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                          Edit
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => openEditModal(d)}
+                            title="Edit record"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-semibold text-purple-700 hover:bg-purple-100 hover:border-purple-300 transition"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => setDeletingId(d.id)}
+                            title="Delete record"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 hover:border-red-300 transition"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -271,6 +303,40 @@ export default function MaintenanceDataPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Delete Confirmation Modal ── */}
+      {deletingId !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-gray-900">Confirm Delete</h2>
+              <button onClick={() => setDeletingId(null)} className="text-gray-400 hover:text-gray-600 transition">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-sm text-gray-700">
+                Are you sure you want to delete <span className="font-semibold text-gray-900">Data ID #{deletingId}</span>? This action cannot be undone.
+              </p>
+            </div>
+            <div className="flex gap-3 justify-end px-6 pb-5">
+              <button
+                onClick={() => setDeletingId(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleteLoading}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition disabled:opacity-50"
+              >
+                {deleteLoading ? 'Deleting…' : 'Delete Record'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Add / Edit Modal ── */}
       {isModalOpen && (

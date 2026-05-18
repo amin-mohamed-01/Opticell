@@ -84,3 +84,33 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const db = getDb();
+    if (!process.env.POSTGRES_URI) {
+      return NextResponse.json({ error: 'POSTGRES_URI is not set' }, { status: 500 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    if (!id || isNaN(Number(id))) {
+      return NextResponse.json({ error: 'Valid data id is required as a query param (?id=...)' }, { status: 400 });
+    }
+
+    const result = await db.query(
+      `DELETE FROM maintenance_report_data WHERE id = $1 RETURNING id`,
+      [Number(id)]
+    );
+
+    if (result.rowCount === 0) {
+      return NextResponse.json({ error: `No record found with id ${id}` }, { status: 404 });
+    }
+
+    return NextResponse.json({ deleted: result.rows[0].id });
+  } catch (error: any) {
+    console.error('Error deleting maintenance report data:', error);
+    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+  }
+}

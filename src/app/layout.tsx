@@ -15,7 +15,13 @@ export const metadata: Metadata = {
   title: 'OptiCell',
   description: 'Bioreactor Monitoring Dashboard',
   icons: {
-    icon: '/logo.png',
+    icon: [
+      { url: '/logo.png', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/logo.png', type: 'image/png' },
+    ],
+    shortcut: '/logo.png',
   },
 };
 

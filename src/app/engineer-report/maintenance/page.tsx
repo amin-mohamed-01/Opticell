@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
-import { Wrench, AlertTriangle, CheckCircle, Clock, Plus, X } from 'lucide-react';
+import { Wrench, AlertTriangle, CheckCircle, Clock, Plus, X, Trash2 } from 'lucide-react';
 
 type Report = {
   id: number;
@@ -41,6 +41,10 @@ export default function MaintenanceReportPage() {
   const [fetching, setFetching] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
 
+  // Delete confirm state
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -77,6 +81,24 @@ export default function MaintenanceReportPage() {
       setErrorMsg(err.message);
     } finally {
       setFetching(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (deletingId === null) return;
+    setDeleteLoading(true);
+    try {
+      const res = await fetch(`/api/maintenance?id=${deletingId}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to delete report');
+      }
+      await fetchReports();
+    } catch (err: any) {
+      alert(`Error: ${err.message}`);
+    } finally {
+      setDeleteLoading(false);
+      setDeletingId(null);
     }
   };
 
@@ -170,7 +192,7 @@ export default function MaintenanceReportPage() {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  {['Report ID', 'Date', 'Machine ID', 'Alert ID', 'Review', 'Priority', 'Status'].map((h) => (
+                  {['Report ID', 'Date', 'Machine ID', 'Alert ID', 'Review', 'Priority', 'Status', 'Actions'].map((h) => (
                     <th key={h} className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 whitespace-nowrap">
                       {h}
                     </th>
@@ -180,11 +202,11 @@ export default function MaintenanceReportPage() {
               <tbody>
                 {fetching ? (
                   <tr>
-                    <td colSpan={7} className="px-8 py-16 text-center text-gray-500">Loading records...</td>
+                    <td colSpan={8} className="px-8 py-16 text-center text-gray-500">Loading records...</td>
                   </tr>
                 ) : reports.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-8 py-16 text-center text-gray-500">No reports found.</td>
+                    <td colSpan={8} className="px-8 py-16 text-center text-gray-500">No reports found.</td>
                   </tr>
                 ) : (
                   reports.map((r) => (
@@ -205,6 +227,16 @@ export default function MaintenanceReportPage() {
                           {r.status.replace('_', ' ')}
                         </div>
                       </td>
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => setDeletingId(r.id)}
+                          title="Delete report"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 hover:border-red-300 transition"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Delete
+                        </button>
+                      </td>
                     </tr>
                   ))
                 )}
@@ -213,6 +245,40 @@ export default function MaintenanceReportPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deletingId !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-gray-900">Confirm Delete</h2>
+              <button onClick={() => setDeletingId(null)} className="text-gray-400 hover:text-gray-600 transition">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-sm text-gray-700">
+                Are you sure you want to delete <span className="font-semibold text-gray-900">Report #{deletingId}</span>? This action cannot be undone.
+              </p>
+            </div>
+            <div className="flex gap-3 justify-end px-6 pb-5">
+              <button
+                onClick={() => setDeletingId(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleteLoading}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition disabled:opacity-50"
+              >
+                {deleteLoading ? 'Deleting…' : 'Delete Report'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Create Modal */}
       {isModalOpen && (
