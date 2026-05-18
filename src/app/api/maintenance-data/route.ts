@@ -48,3 +48,39 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }
+
+export async function PUT(req: NextRequest) {
+  try {
+    const db = getDb();
+    if (!process.env.POSTGRES_URI) {
+      return NextResponse.json({ error: 'POSTGRES_URI is not set' }, { status: 500 });
+    }
+
+    const body = await req.json();
+    const { id, report_id, maintenance_date, maintenance_type, notes } = body;
+
+    if (!id || !report_id || !maintenance_date || !maintenance_type) {
+      return NextResponse.json({ error: 'Missing required fields (id, report_id, maintenance_date, maintenance_type)' }, { status: 400 });
+    }
+
+    const result = await db.query(
+      `UPDATE maintenance_report_data
+       SET report_id = $1,
+           maintenance_date = $2,
+           maintenance_type = $3,
+           notes = $4
+       WHERE id = $5
+       RETURNING *`,
+      [report_id, maintenance_date, maintenance_type, notes || '', id]
+    );
+
+    if (result.rowCount === 0) {
+      return NextResponse.json({ error: `No record found with id ${id}` }, { status: 404 });
+    }
+
+    return NextResponse.json(result.rows[0]);
+  } catch (error: any) {
+    console.error('Error updating maintenance report data:', error);
+    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+  }
+}
