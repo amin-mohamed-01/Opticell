@@ -49,24 +49,17 @@ export async function GET(req: NextRequest) {
 
     let doc: any = null;
 
-    if (afterId) {
-      // Find the document with this _id first to get its _uploadedAt timestamp
-      const anchor = await UploadModel.findById(afterId).lean();
-
-      if (anchor && (anchor as any)._uploadedAt) {
-        // Return the next document AFTER this timestamp in ascending order
-        doc = await UploadModel.findOne({
-          _uploadedAt: { $gt: (anchor as any)._uploadedAt },
-        })
-          .sort({ _uploadedAt: 1 })
-          .lean();
-      } else {
-        // Anchor not found — return oldest document as fallback
-        doc = await UploadModel.findOne({}).sort({ _uploadedAt: 1 }).lean();
-      }
+    if (afterId && mongoose.Types.ObjectId.isValid(afterId)) {
+      // Use _id for cursor pagination. _id is naturally chronological.
+      // This stops it from looping because if no newer doc exists, it just returns null and waits.
+      doc = await UploadModel.findOne({
+        _id: { $gt: new mongoose.Types.ObjectId(afterId) }
+      })
+      .sort({ _id: 1 })
+      .lean();
     } else {
-      // No cursor — return the very first (oldest) document
-      doc = await UploadModel.findOne({}).sort({ _uploadedAt: 1 }).lean();
+      // No cursor — return the very first (oldest) document to start the replay
+      doc = await UploadModel.findOne({}).sort({ _id: 1 }).lean();
     }
 
     return NextResponse.json(

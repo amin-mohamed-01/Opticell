@@ -187,9 +187,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    // Kick off first fetch immediately, then poll every 300ms
+    // Kick off first fetch immediately, then poll every 2000ms (2 seconds)
     fetchNext();
-    streamTimer = setInterval(fetchNext, 300);
+    streamTimer = setInterval(fetchNext, 2000);
 
     return () => {
       mounted = false;

@@ -150,9 +150,9 @@ export const ReportsProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
-    // Start immediately, then every 300ms
+    // Start immediately, then every 2000ms (2 seconds)
     fetchNext();
-    streamTimer = setInterval(fetchNext, 300);
+    streamTimer = setInterval(fetchNext, 2000);
 
     return () => {
       mounted = false;
