@@ -161,39 +161,34 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    // Fetch the very next document from the cursor API
-    const fetchNext = async () => {
+    // Opens a persistent SSE connection to receive live MongoDB data
+    const eventSource = new EventSource('/api/stream');
+
+    // Fires once for the latest existing document on connect, and then for every insert
+    eventSource.onmessage = (event) => {
       try {
-        const url = lastIdRef.current
-          ? `/api/stream?after=${lastIdRef.current}&t=${Date.now()}`
-          : `/api/stream?t=${Date.now()}`;
+        const newData = JSON.parse(event.data);
+        
+        // Deduplicate by _id to prevent duplicate entries
+        if (lastIdRef.current === newData._id) return;
+        lastIdRef.current = newData._id;
 
-        const res = await fetch(url, { cache: 'no-store' });
-        if (!res.ok) return;
-
-        const json = await res.json();
-        if (!mounted) return;
-
-        if (json.data) {
-          // New document received — update cursor and render it
-          lastIdRef.current = json.data._id;
-          processRow(json.data);
-          setLoadingError(null);
-        }
-        // If json.data is null → no new data yet, do nothing, just wait
+        processRow(newData);
+        setLoadingError(null);
       } catch (err) {
-        // Silent fail — will retry on next tick
-        console.error('[DashboardStream] fetch error:', err);
+        console.error('Error parsing SSE data:', err);
       }
     };
 
-    // Kick off first fetch immediately, then poll every 2000ms (2 seconds)
-    fetchNext();
-    streamTimer = setInterval(fetchNext, 2000);
+    // Handle connection errors gracefully
+    eventSource.onerror = (err) => {
+      console.error('SSE connection error:', err);
+      eventSource.close();
+    };
 
+    // Cleanup on component unmount
     return () => {
-      mounted = false;
-      clearInterval(streamTimer);
+      eventSource.close();
     };
   }, []);
 

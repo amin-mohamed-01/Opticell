@@ -21,23 +21,11 @@ export async function OPTIONS() {
 /**
  * GET /api/stream
  *
- * Sequential cursor-based API — always returns exactly ONE document at a time.
- *
- * Query params:
- *   after  — (optional) the _id of the last document the client received.
- *             When provided, returns the next document uploaded AFTER that one
- *             in chronological order.
- *             When omitted, returns the oldest document in the collection.
- *
- * Response:
- *   { data: <document> }   — next document exists
- *   { data: null }         — no new data yet, client should wait and retry
+ * Server-Sent Events (SSE) API — maintains a persistent connection with the client
+ * and streams real-time updates using MongoDB Change Streams.
  */
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const afterId = searchParams.get('after');
-
     const connection = await connectToSaveDatabase();
     const UploadSchema = new mongoose.Schema(
       {},
@@ -47,29 +35,49 @@ export async function GET(req: NextRequest) {
       connection.models.Upload ||
       connection.model('Upload', UploadSchema);
 
-    let doc: any = null;
+    // Create a ReadableStream to stream Server-Sent Events (SSE) to the client
+    const stream = new ReadableStream({
+      async start(controller) {
+        // 1. On first connection: query MongoDB for the single most recent document
+        const latestDoc = await UploadModel.findOne({}, {}, { sort: { _id: -1 } }).lean();
+        const encoder = new TextEncoder();
 
-    if (afterId && mongoose.Types.ObjectId.isValid(afterId)) {
-      // Use _id for cursor pagination. _id is naturally chronological.
-      // This stops it from looping because if no newer doc exists, it just returns null and waits.
-      doc = await UploadModel.findOne({
-        _id: { $gt: new mongoose.Types.ObjectId(afterId) }
-      })
-      .sort({ _id: 1 })
-      .lean();
-    } else {
-      // No cursor — return the very first (oldest) document to start the replay
-      doc = await UploadModel.findOne({}).sort({ _id: 1 }).lean();
-    }
+        if (latestDoc) {
+          // Send the initial most recent document immediately
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(latestDoc)}\n\n`));
+        }
 
-    return NextResponse.json(
-      { data: doc ?? null },
-      { headers: getCorsHeaders() }
-    );
+        // 2. Open a MongoDB Change Stream to listen for new inserts
+        const changeStream = UploadModel.watch([], { fullDocument: 'updateLookup' });
+
+        // 3. On every 'change' event where operationType is 'insert', send the new document
+        changeStream.on('change', (change) => {
+          if (change.operationType === 'insert') {
+            const newDoc = change.fullDocument;
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(newDoc)}\n\n`));
+          }
+        });
+
+        // 4. On client disconnect, close the change stream cleanly
+        req.signal.addEventListener('abort', () => {
+          changeStream.close();
+          controller.close();
+        });
+      }
+    });
+
+    // Return the stream with appropriate SSE headers
+    return new NextResponse(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
   } catch (error: any) {
     console.error('❌ /api/stream error:', error.message);
     return NextResponse.json(
-      { data: null, error: error.message },
+      { error: error.message },
       { status: 500, headers: getCorsHeaders() }
     );
   }

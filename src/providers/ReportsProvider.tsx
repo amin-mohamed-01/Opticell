@@ -124,39 +124,35 @@ export const ReportsProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
-    // Fetch the very next document from the cursor API
-    const fetchNext = async () => {
+    // Opens a persistent SSE connection to receive live MongoDB data
+    const eventSource = new EventSource('/api/stream');
+
+    // Fires once for the latest existing document on connect, and then for every insert
+    eventSource.onmessage = (event) => {
       try {
-        const url = lastIdRef.current
-          ? `/api/stream?after=${lastIdRef.current}&t=${Date.now()}`
-          : `/api/stream?t=${Date.now()}`;
+        const newData = JSON.parse(event.data);
+        
+        // Deduplicate by _id to prevent duplicate entries
+        if (lastIdRef.current === newData._id) return;
+        lastIdRef.current = newData._id;
 
-        const res = await fetch(url, { cache: 'no-store' });
-        if (!res.ok) return;
-
-        const json = await res.json();
-        if (!mounted) return;
-
-        if (json.data) {
-          // New document received — advance cursor, render it
-          lastIdRef.current = json.data._id;
-          processRow(json.data);
-          setLoading(false);
-          setError(null);
-        }
-        // json.data === null → no new data, stay idle, retry next tick
+        processRow(newData);
+        setLoading(false);
+        setError(null);
       } catch (err) {
-        console.error('[ReportsStream] fetch error:', err);
+        console.error('Error parsing SSE data:', err);
       }
     };
 
-    // Start immediately, then every 2000ms (2 seconds)
-    fetchNext();
-    streamTimer = setInterval(fetchNext, 2000);
+    // Handle connection errors gracefully
+    eventSource.onerror = (err) => {
+      console.error('SSE connection error:', err);
+      eventSource.close();
+    };
 
+    // Cleanup on component unmount
     return () => {
-      mounted = false;
-      clearInterval(streamTimer);
+      eventSource.close();
     };
   }, []);
 
