@@ -549,8 +549,55 @@ function buildChartHtml(chartContent: string): string {
 // ─── Smart Table Renderer ────────────────────────────────────────────────────
 
 function renderContentWithTables(content: string): string {
+  let result = content;
+  let finalThinkingHtml = '';
+
+  // ── -1. Render [THINKING]...[/THINKING] blocks ────────────────────────────
+  const thinkMatch = result.match(/\[THINKING\]([\s\S]*?)(\[\/THINKING\]|$)/i);
+  if (thinkMatch) {
+    const thinkingContent = thinkMatch[1].trim();
+    const isComplete = thinkMatch[2].toLowerCase() === '[\/thinking]';
+    
+    // Remove the block completely from its original position
+    result = result.replace(thinkMatch[0], '').trim();
+
+    if (!isComplete) {
+      // While thinking, show the background animation at the top
+      const thinkingHtml = `
+        <div class="bg-white rounded-2xl px-5 py-3 shadow-sm border border-gray-200 flex items-center gap-4 transition-all duration-300 w-max mb-2">
+          <div class="relative flex items-center justify-center">
+            <svg class="text-blue-500 animate-pulse" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/></svg>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-0.5">
+              Opticell Analysis
+            </span>
+            <span class="text-gray-500 text-sm flex items-center gap-1">
+              Thinking in background...
+            </span>
+          </div>
+        </div>
+      `;
+      result = thinkingHtml + result;
+    } else {
+      // When complete, we will append it to the VERY END of the message
+      finalThinkingHtml = `
+        <details class="group border border-gray-200 rounded-md bg-gray-50 overflow-hidden mt-4 inline-block min-w-[200px] max-w-full" dir="ltr">
+          <summary class="flex items-center gap-2 px-3 py-1.5 cursor-pointer hover:bg-gray-100 transition-colors list-none text-xs font-medium text-gray-500">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+            Thinking Process
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-auto text-gray-400 group-open:rotate-180 transition-transform"><path d="m6 9 6 6 6-6"/></svg>
+          </summary>
+          <div class="px-3 py-2 border-t border-gray-200 bg-white text-xs text-gray-500 whitespace-pre-wrap font-mono italic">
+            ${thinkingContent}
+          </div>
+        </details>
+      `;
+    }
+  }
+
   // ── 0. Render [CHART]...[/CHART] visualization blocks ────────────────────
-  let result = content.replace(
+  result = result.replace(
     /\[CHART\]([\s\S]*?)\[\/CHART\]/g,
     (_, chartContent) => buildChartHtml(chartContent)
   );
@@ -671,6 +718,11 @@ function renderContentWithTables(content: string): string {
   // ── 3. Render ## / ### markdown headings ─────────────────────────────────
   result = renderMarkdownHeadings(result);
 
+  // Append final thinking HTML if it exists (so it appears at the very bottom)
+  if (finalThinkingHtml) {
+    result += finalThinkingHtml;
+  }
+
   return result;
 }
 
@@ -748,6 +800,7 @@ function ChatWindow({
   const [streamingContent, setStreamingContent] = useState('');
   const [streamingSteps, setStreamingSteps] = useState<AgentStep[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const thinkingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Typewriter refs — survive re-renders without causing them
   const charQueueRef = useRef<string[]>([]);
@@ -761,6 +814,13 @@ function ChatWindow({
   useEffect(() => {
     scrollToBottom();
   }, [messages, streamingContent, loading]);
+
+  useEffect(() => {
+    // Focus the input automatically whenever the chat loads or changes
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [conversationId]);
 
   const displayedMessages = [...messages];
   if (streamingContent || streamingSteps.length > 0) {
@@ -965,27 +1025,18 @@ function ChatWindow({
         {loading && !streamingContent && (
           <div className="flex justify-start">
             {isDeepThinking ? (
-              // Enhanced Glowing AI Process Animation
-              <div className="relative flex items-center p-[2px] rounded-2xl bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 animate-pulse shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all duration-500">
-                <div className="bg-white rounded-[14px] px-5 py-3 flex items-center gap-4 w-full h-full relative z-10">
-                  <div className="relative flex items-center justify-center">
-                    {/* Glowing background behind icon */}
-                    <div className="absolute w-8 h-8 bg-purple-300 rounded-full blur-md animate-ping opacity-60"></div>
-                    <Brain className="text-blue-600 relative z-10" size={24} />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 uppercase tracking-widest mb-0.5">
-                      Opticell Neural Engine
-                    </span>
-                    <span className="text-gray-800 font-medium text-sm flex items-center gap-1">
-                      {agentStatus || 'Analyzing context'}
-                      <span className="flex gap-1 ml-1 items-center h-full pt-1">
-                        <span className="w-1 h-1 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                        <span className="w-1 h-1 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                        <span className="w-1 h-1 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
-                      </span>
-                    </span>
-                  </div>
+              // Simple, clean analysis icon (removed heavy effects)
+              <div className="bg-white rounded-2xl px-5 py-3 shadow-sm border border-gray-200 flex items-center gap-4 transition-all duration-300">
+                <div className="relative flex items-center justify-center">
+                  <Brain className="text-blue-500 animate-pulse" size={24} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-0.5">
+                    Opticell Analysis
+                  </span>
+                  <span className="text-gray-500 text-sm flex items-center gap-1">
+                    {agentStatus || 'Analyzing context...'}
+                  </span>
                 </div>
               </div>
             ) : (
@@ -1004,6 +1055,8 @@ function ChatWindow({
       <div className="border-t border-gray-200 bg-white px-5 py-4">
         <div className="flex gap-3 max-w-4xl mx-auto">
           <input
+            ref={inputRef}
+            autoFocus
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
