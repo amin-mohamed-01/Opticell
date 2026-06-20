@@ -14,7 +14,6 @@ import {
   ChevronRight,
   Wrench,
   Database,
-  BrainCircuit,
 } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import { useState } from 'react';
@@ -114,29 +113,6 @@ export default function Sidebar() {
               })}
             </div>
           )}
-        </div>
-
-        {/* ── ML Face — Future Work ── */}
-        <div className="mt-2">
-          <div className="px-4 py-1 mb-1">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Future Work</span>
-          </div>
-          <Link href="/ml-face">
-            <div
-              className={cn(
-                'flex items-center gap-3 px-4 py-3 mb-2 rounded-lg transition-all group',
-                pathname === '/ml-face'
-                  ? 'bg-purple-100 text-purple-600 font-medium'
-                  : 'text-gray-700 hover:bg-purple-50 hover:text-purple-600'
-              )}
-            >
-              <BrainCircuit className="w-5 h-5 shrink-0" />
-              <span className="flex-1">ML Face</span>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-600 border border-purple-200">
-                AI
-              </span>
-            </div>
-          </Link>
         </div>
       </nav>
 

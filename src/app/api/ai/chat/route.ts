@@ -5,7 +5,7 @@ import connectToSaveDatabase from '@/lib/mongodb-save';
 import mongoose from 'mongoose';
 import { groqFetch } from '@/lib/groq-fetch';
 
-const ML_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
 
 // ── Sensor thresholds (must match DashboardContent.tsx) ────────────────────
 function getSensorStatus(key: string, value: number): string {
@@ -66,69 +66,7 @@ async function translateText(text: string, targetLang: 'English' | 'Arabic'): Pr
   }
 }
 
-// ── Fetch ML predictions from FastAPI backend ──────────────────────────────
-async function fetchMLPredictions(dataArray: any[]): Promise<string> {
-  try {
-    if (!dataArray || dataArray.length < 15) {
-      return 'ML predictions unavailable (insufficient data).';
-    }
 
-    // Flatten sensor data for FastAPI (same format as ml-face page)
-    const history = dataArray.map((r: any) => {
-      const d = r.data || {};
-      return {
-        temperature: d.temperature ?? d.temprature ?? 0,
-        humidity: d.humidity ?? 0,
-        pressure: d.pressure ?? 102,
-        gas_quality: d.gas_quality ?? d.gasQuality ?? 0,
-      };
-    });
-
-    const res = await fetch(`${ML_API_URL}/predict-sequence`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ history, num_predictions: 20 }),
-      signal: AbortSignal.timeout(15000), // 15s timeout
-    });
-
-    if (!res.ok) {
-      return `ML predictions unavailable (API error: ${res.status}).`;
-    }
-
-    const data = await res.json();
-    const { predictions, summary } = data;
-
-    // Build a readable ML context for the AI
-    const labelSequence = predictions.map((p: any) => p.predicted_label).join(' → ');
-    const rulValues = predictions.map((p: any) => p.predicted_rul);
-    const avgRul = rulValues.length > 0
-      ? (rulValues.reduce((a: number, b: number) => a + b, 0) / rulValues.length).toFixed(1)
-      : 'N/A';
-    const latestRul = summary.latest_rul?.toFixed(1) ?? 'N/A';
-
-    return `
-ML MODEL PREDICTIONS (Last ${summary.total_predictions} sliding-window analyses):
-- Prediction Sequence: ${labelSequence}
-- Current ML Status: ${summary.latest_label?.toUpperCase()}
-- System Trend: ${summary.trend?.toUpperCase()} (based on ML model pattern detection)
-- Normal predictions: ${summary.normal_count} | Warning: ${summary.warning_count} | Critical: ${summary.critical_count}
-- Latest RUL (Remaining Useful Life): ${latestRul} cycles
-- Average RUL across window: ${avgRul} cycles
-
-ML INTERPRETATION RULES (you MUST follow these):
-- If latest_label is "warning" or "critical" → NEVER say "everything is normal". Report the issue.
-- If trend is "degrading" → Warn the user that conditions are worsening and action is needed.
-- If trend is "improving" → Tell the user conditions are getting better.
-- If warning_count + critical_count > 0 → Always mention these in your response.
-- RUL < 10 → URGENT: Equipment failure is imminent. Recommend immediate maintenance.
-- RUL 10-25 → Schedule maintenance soon.
-- RUL > 25 → Equipment has reasonable remaining life.
-- The ML model is the AUTHORITATIVE source for system status. It overrides simple threshold checks.`;
-  } catch (err) {
-    console.error('[ML Prediction Fetch Error]:', err);
-    return 'ML predictions temporarily unavailable (FastAPI server may be offline).';
-  }
-}
 
 // ── Build RAG context from sensor history (last N readings) ────────────────
 function buildRAGContext(dataArray: any[]): string {
@@ -248,7 +186,7 @@ export async function POST(req: Request) {
     let latestSensorData = 'No real-time data available.';
     let historicalRAGContext = 'No historical data available.';
     let overallStatus = 'Unknown';
-    let fullDataArray: any[] = [];
+
     let preBuiltCharts = '';
 
     try {
@@ -271,7 +209,7 @@ export async function POST(req: Request) {
         }
       }
 
-      fullDataArray = dataArray; // save for ML predictions later
+
 
       if (dataArray && dataArray.length > 0) {
         // ── Process last 20 readings (same as ReportsProvider) ──────────
@@ -393,16 +331,7 @@ ${preBuiltAverages}`;
       console.error('Failed to read sensor data:', err);
     }
 
-    // ── FETCH ML PREDICTIONS FROM FASTAPI ────────────────────────────────
-    let mlPredictionContext = 'ML predictions not available.';
-    try {
-      if (fullDataArray.length >= 15) {
-        mlPredictionContext = await fetchMLPredictions(fullDataArray);
-      }
-    } catch (err) {
-      console.error('Failed to fetch ML predictions:', err);
-      mlPredictionContext = 'ML predictions temporarily unavailable.';
-    }
+
 
     // ── OPTICELL BRAIN (FULL INTELLIGENT SYSTEM PROMPT) ────────────────────
     const OPTICELL_BRAIN = `
@@ -537,14 +466,6 @@ INFERENCE RULES you MUST apply when relevant:
 5. If all sensors are Normal + Stable -> Report clean health status with no action needed.
 6. Always cross-link related sensors: Temperature <-> Pressure, Humidity <-> Gas Quality.
 
-══════════════════════════════════════════════════
- ML INTELLIGENCE ENGINE (HIGHEST AUTHORITY)
-══════════════════════════════════════════════════
-The following predictions come from a trained Machine Learning model that analyzes
-sliding windows of sensor readings. These ML predictions are MORE ACCURATE than
-simple threshold rules and MUST be your primary source for system health assessment.
-
-${mlPredictionContext}
 
 ══════════════════════════════════════════════════
  LIVE SENSOR FEED (Current Reading)
@@ -555,11 +476,10 @@ CRITICAL DATA RULES:
 - The LIVE SENSOR FEED above shows the DOMINANT STATUS across the last 20 readings — this is more accurate than a single reading.
 - NEVER say "everything is normal" if Warning or Critical counts are > 0 in the status distribution.
 - If the DOMINANT STATUS is Warning or Critical, you MUST alert the user even if the latest single reading looks normal.
-- NEVER guess a Status. Use ONLY the exact values and statuses from the live feed and ML predictions above.
+- NEVER guess a Status. Use ONLY the exact values and statuses from the live feed above.
 - NEVER use old sensor values from previous messages. The live feed above is the single source of truth.
 - When showing data to the user, always include: current latest reading, averages, AND the dominant status breakdown.
 - When writing a [TABLE], include exact readings from the latest reading with per-sensor Status.
-- Cross-reference the threshold-based status with ML predictions. If they disagree, TRUST the ML prediction.
 
 ══════════════════════════════════════════════════
  TABLE FORMAT RULES
