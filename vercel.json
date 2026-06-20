@@ -12,24 +12,5 @@
     "src/app/api/ml/predict-sequence/route.ts": {
       "maxDuration": 30
     }
-  },
-  "env": {
-    "MONGODB_URI": "@mongodb-uri",
-    "MONGODB_SAVE_URI": "@mongodb-save-uri",
-    "GROQ_API_KEY": "@groq-api-key",
-    "GROQ_API_KEY_FALLBACK": "@groq-api-key-fallback",
-    "NEXT_PUBLIC_API_URL": "@next-public-api-url",
-    "OPENROUTER_API_KEY": "@openrouter-api-key",
-    "XAI_API_KEY": "@xai-api-key",
-    "TAVILY_API_KEY": "@tavily-api-key",
-    "COHERE_API_KEY": "@cohere-api-key",
-    "POSTGRES_URI": "@postgres-uri",
-    "RESEND_API_KEY": "@resend-api-key",
-    "NEXT_PUBLIC_FIREBASE_API_KEY": "@firebase-api-key",
-    "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN": "@firebase-auth-domain",
-    "NEXT_PUBLIC_FIREBASE_PROJECT_ID": "@firebase-project-id",
-    "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET": "@firebase-storage-bucket",
-    "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "@firebase-messaging-sender-id",
-    "NEXT_PUBLIC_FIREBASE_APP_ID": "@firebase-app-id"
   }
 }
