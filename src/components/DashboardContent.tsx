@@ -63,8 +63,8 @@ export default function DashboardContent() {
       else if (pressure < 95 || pressure > 110) reasons.push(`Pressure abnormal (${pressure} hPa)`);
       if (gasQuality >= 700) reasons.push(`Gas quality critical (${gasQuality})`);
       else if (gasQuality >= 600) reasons.push(`Gas quality elevated (${gasQuality})`);
-      if (vibration >= 20) reasons.push(`Vibration critical (${vibration})`);
-      else if (vibration >= 10) reasons.push(`Vibration elevated (${vibration})`);
+      if (vibration >= 1.35) reasons.push(`Vibration critical (${vibration})`);
+      else if (vibration >= 1.2) reasons.push(`Vibration elevated (${vibration})`);
     }
   }
 

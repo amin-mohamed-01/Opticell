@@ -37,12 +37,12 @@ function getStatusAndDetails(temp: number, humidity: number, pressure: number, g
   if (humidity >= 95) parts.push(`Humidity ${humidity.toFixed(1)}%`);
   if (pressure < 90 || pressure > 115) parts.push(`Pressure ${pressure} hPa`);
   if (gas >= 700) parts.push(`Gas ${gas}`);
-  if (vibration >= 20) parts.push(`Vibration ${vibration}`);
+  if (vibration >= 1.35) parts.push(`Vibration ${vibration}`);
 
   if (
     temp >= 55 || humidity >= 95 ||
     pressure < 90 || pressure > 115 ||
-    gas >= 700 || vibration >= 20
+    gas >= 700 || vibration >= 1.35
   ) return { status: 'Critical', details: `⛔ Critical: ${parts.join(', ')}` };
 
   // Warning check
@@ -51,12 +51,12 @@ function getStatusAndDetails(temp: number, humidity: number, pressure: number, g
   if (humidity >= 85) parts.push(`Humidity ${humidity.toFixed(1)}%`);
   if (pressure < 95 || pressure > 110) parts.push(`Pressure ${pressure} hPa`);
   if (gas >= 600) parts.push(`Gas ${gas}`);
-  if (vibration >= 10) parts.push(`Vibration ${vibration}`);
+  if (vibration >= 1.2) parts.push(`Vibration ${vibration}`);
 
   if (
     temp >= 45 || humidity >= 85 ||
     pressure < 95 || pressure > 110 ||
-    gas >= 600 || vibration >= 10
+    gas >= 600 || vibration >= 1.2
   ) return { status: 'Warning', details: `⚠️ Warning: ${parts.join(', ')}` };
 
   return { status: 'Normal', details: 'All parameters within normal range' };

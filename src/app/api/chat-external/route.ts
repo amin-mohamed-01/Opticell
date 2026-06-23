@@ -108,7 +108,7 @@ function formatSensorTable(temp: number, hum: number, press: number, gas: number
   const hS = hum >= 95 ? 'Critical' : hum >= 85 ? 'Warning' : 'Normal';
   const pS = press < 90 || press > 115 ? 'Critical' : press < 95 || press > 110 ? 'Warning' : 'Normal';
   const gS = gas >= 700 ? 'Critical' : gas >= 600 ? 'Warning' : 'Normal';
-  const vS = vibration >= 20 ? 'Critical' : vibration >= 10 ? 'Warning' : 'Normal';
+  const vS = vibration >= 1.35 ? 'Critical' : vibration >= 1.2 ? 'Warning' : 'Normal';
   return `[TABLE]\nSensor | Reading | Status\n--- | --- | ---\nTemperature | ${temp}C | ${tS}\nHumidity | ${hum}% | ${hS}\nPressure | ${press}hPa | ${pS}\nGas Quality | ${gas} | ${gS}\nVibration | ${vibration} | ${vS}\n[/TABLE]`;
 }
 

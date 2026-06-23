@@ -180,8 +180,8 @@ export default function ReportsContent() {
                       </td>
                       {/* Vibration */}
                       <td className={`px-6 py-4 text-sm font-medium ${
-                        report.vibration >= 20 ? 'text-red-600' :
-                        report.vibration >= 10 ? 'text-yellow-600' : 'text-gray-900'
+                        report.vibration >= 1.35 ? 'text-red-600' :
+                        report.vibration >= 1.2 ? 'text-yellow-600' : 'text-gray-900'
                       }`}>
                         {report.vibration}
                       </td>

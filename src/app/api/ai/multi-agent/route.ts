@@ -14,7 +14,7 @@ function getSensorStatus(key: string, value: number): string {
   if (key === "humidity") return value >= 95 ? "Critical" : value >= 85 ? "High" : "Normal";
   if (key === "pressure") return value < 90 || value > 115 ? "Critical" : value < 95 || value > 110 ? "High" : "Normal";
   if (key === "gas_quality") return value >= 700 ? "Critical" : value >= 600 ? "High" : "Normal";
-  if (key === "vibration") return value >= 20 ? "Critical" : value >= 10 ? "High" : "Normal";
+  if (key === "vibration") return value >= 1.35 ? "Critical" : value >= 1.2 ? "High" : "Normal";
   return "Unknown";
 }
 

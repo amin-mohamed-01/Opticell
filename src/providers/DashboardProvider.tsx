@@ -41,7 +41,7 @@ export function getStatusFromData(d: SensorData): 'normal' | 'warning' | 'critic
     d.humidity >= 95 ||
     d.pressure < 90 || d.pressure > 115 ||
     d.gasQuality >= 700 ||
-    d.vibration >= 20
+    d.vibration >= 1.35
   ) return 'critical';
 
   // Warning thresholds
@@ -50,7 +50,7 @@ export function getStatusFromData(d: SensorData): 'normal' | 'warning' | 'critic
     d.humidity >= 85 ||
     d.pressure < 95 || d.pressure > 110 ||
     d.gasQuality >= 600 ||
-    d.vibration >= 10
+    d.vibration >= 1.2
   ) return 'warning';
 
   return 'normal';
@@ -77,8 +77,8 @@ export function calculateHealthScore(d: SensorData): number {
   else if (d.gasQuality >= 600) score -= 12;
 
   // Vibration
-  if (d.vibration >= 20) score -= 25;
-  else if (d.vibration >= 10) score -= 12;
+  if (d.vibration >= 1.35) score -= 25;
+  else if (d.vibration >= 1.2) score -= 12;
 
   return Math.max(0, Math.min(100, Math.round(score)));
 }
@@ -218,7 +218,7 @@ function buildCriticalDetails(d: SensorData): string {
   if (d.humidity >= 95) parts.push(`Humidity ${d.humidity.toFixed(1)}%`);
   if (d.pressure < 90 || d.pressure > 115) parts.push(`Pressure ${d.pressure} hPa`);
   if (d.gasQuality >= 700) parts.push(`Gas ${d.gasQuality}`);
-  if (d.vibration >= 20) parts.push(`Vibration ${d.vibration}`);
+  if (d.vibration >= 1.35) parts.push(`Vibration ${d.vibration}`);
   return parts.length ? `⛔ Critical: ${parts.join(', ')}` : 'Critical deviation detected';
 }
 
@@ -228,7 +228,7 @@ function buildWarningDetails(d: SensorData): string {
   if (d.humidity >= 85) parts.push(`Humidity ${d.humidity.toFixed(1)}%`);
   if (d.pressure < 95 || d.pressure > 110) parts.push(`Pressure ${d.pressure} hPa`);
   if (d.gasQuality >= 600) parts.push(`Gas ${d.gasQuality}`);
-  if (d.vibration >= 10) parts.push(`Vibration ${d.vibration}`);
+  if (d.vibration >= 1.2) parts.push(`Vibration ${d.vibration}`);
   return parts.length ? `⚠️ Warning: ${parts.join(', ')}` : 'Parameters approaching limits';
 }
 

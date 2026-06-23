@@ -22,7 +22,7 @@ function getSensorStatus(key: string, value: number): string {
     return value >= 700 ? 'Critical' : value >= 600 ? 'High' : 'Normal';
   }
   if (key === 'vibration') {
-    return value >= 20 ? 'Critical' : value >= 10 ? 'High' : 'Normal';
+    return value >= 1.35 ? 'Critical' : value >= 1.2 ? 'High' : 'Normal';
   }
   return 'Unknown';
 }
@@ -115,7 +115,7 @@ function formatSensorTable(temp: number, humidity: number, pressure: number, gas
   const hS = humidity >= 95 ? 'Critical' : humidity >= 85 ? 'Warning' : 'Normal';
   const pS = pressure < 90 || pressure > 115 ? 'Critical' : pressure < 95 || pressure > 110 ? 'Warning' : 'Normal';
   const gS = gas >= 700 ? 'Critical' : gas >= 600 ? 'Warning' : 'Normal';
-  const vS = vibration >= 20 ? 'Critical' : vibration >= 10 ? 'Warning' : 'Normal';
+  const vS = vibration >= 1.35 ? 'Critical' : vibration >= 1.2 ? 'Warning' : 'Normal';
   return `[TABLE]
 Sensor | Reading | Status
 --- | --- | ---
@@ -342,23 +342,23 @@ Please feel free to ask me anything within these areas, and I will be happy to a
           let status = 'Normal';
           let details = 'All parameters within normal range';
 
-          if (temp >= 55 || humidity >= 95 || pressure < 90 || pressure > 115 || gas >= 700 || vibration >= 20) {
+          if (temp >= 55 || humidity >= 95 || pressure < 90 || pressure > 115 || gas >= 700 || vibration >= 1.35) {
             status = 'Critical';
             const parts: string[] = [];
             if (temp >= 55) parts.push(`Temp ${temp.toFixed(1)}C`);
             if (humidity >= 95) parts.push(`Humidity ${humidity.toFixed(1)}%`);
             if (pressure < 90 || pressure > 115) parts.push(`Pressure ${pressure}hPa`);
             if (gas >= 700) parts.push(`Gas ${gas}`);
-            if (vibration >= 20) parts.push(`Vibration ${vibration}`);
+            if (vibration >= 1.35) parts.push(`Vibration ${vibration}`);
             details = `Critical: ${parts.join(', ')}`;
-          } else if (temp >= 45 || humidity >= 85 || pressure < 95 || pressure > 110 || gas >= 600 || vibration >= 10) {
+          } else if (temp >= 45 || humidity >= 85 || pressure < 95 || pressure > 110 || gas >= 600 || vibration >= 1.2) {
             status = 'Warning';
             const parts: string[] = [];
             if (temp >= 45) parts.push(`Temp ${temp.toFixed(1)}C`);
             if (humidity >= 85) parts.push(`Humidity ${humidity.toFixed(1)}%`);
             if (pressure < 95 || pressure > 110) parts.push(`Pressure ${pressure}hPa`);
             if (gas >= 600) parts.push(`Gas ${gas}`);
-            if (vibration >= 10) parts.push(`Vibration ${vibration}`);
+            if (vibration >= 1.2) parts.push(`Vibration ${vibration}`);
             details = `Warning: ${parts.join(', ')}`;
           }
 
@@ -422,7 +422,7 @@ CURRENT LATEST READING:
 - Humidity    : ${latest.humidity} % -> Status: ${latest.humidity >= 95 ? 'Critical' : latest.humidity >= 85 ? 'Warning' : 'Normal'}
 - Pressure    : ${latest.pressure} hPa -> Status: ${latest.pressure < 90 || latest.pressure > 115 ? 'Critical' : latest.pressure < 95 || latest.pressure > 110 ? 'Warning' : 'Normal'}
 - Gas Quality : ${latest.gas} -> Status: ${latest.gas >= 700 ? 'Critical' : latest.gas >= 600 ? 'Warning' : 'Normal'}
-- Vibration   : ${latest.vibration} -> Status: ${latest.vibration >= 20 ? 'Critical' : latest.vibration >= 10 ? 'Warning' : 'Normal'}
+- Vibration   : ${latest.vibration} -> Status: ${latest.vibration >= 1.35 ? 'Critical' : latest.vibration >= 1.2 ? 'Warning' : 'Normal'}
 
 AVERAGES (last 20 readings):
 - Avg Temperature : ${avgTemp} C
