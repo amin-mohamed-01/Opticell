@@ -64,6 +64,7 @@ async function fetchMLPredictions(dataArray: any[]): Promise<string> {
       humidity: r.data?.humidity ?? 0,
       pressure: r.data?.pressure ?? 102,
       gas_quality: r.data?.gas_quality ?? r.data?.gasQuality ?? 0,
+      vibration: r.data?.vibration ?? 0,
     }));
     const res = await fetch(`${ML_API_URL}/predict-sequence`, {
       method: 'POST',
@@ -102,13 +103,13 @@ async function fetchMaintenanceReports(): Promise<string> {
   }
 }
 
-// ── Format sensor table ─────────────────────────────────────────────────────
-function formatSensorTable(temp: number, hum: number, press: number, gas: number): string {
-  const tS = temp > 45 ? 'Critical' : temp > 38 ? 'Warning' : 'Normal';
-  const hS = hum > 85 ? 'Critical' : hum > 75 ? 'Warning' : 'Normal';
-  const pS = press < 98 || press > 106 ? 'Critical' : press < 100 || press > 104 ? 'Warning' : 'Normal';
-  const gS = gas > 500 ? 'Critical' : gas > 200 ? 'Warning' : 'Normal';
-  return `[TABLE]\nSensor | Reading | Status\n--- | --- | ---\nTemperature | ${temp}C | ${tS}\nHumidity | ${hum}% | ${hS}\nPressure | ${press}hPa | ${pS}\nGas Quality | ${gas} | ${gS}\n[/TABLE]`;
+function formatSensorTable(temp: number, hum: number, press: number, gas: number, vibration: number): string {
+  const tS = temp >= 55 ? 'Critical' : temp >= 45 ? 'Warning' : 'Normal';
+  const hS = hum >= 95 ? 'Critical' : hum >= 85 ? 'Warning' : 'Normal';
+  const pS = press < 90 || press > 115 ? 'Critical' : press < 95 || press > 110 ? 'Warning' : 'Normal';
+  const gS = gas >= 700 ? 'Critical' : gas >= 600 ? 'Warning' : 'Normal';
+  const vS = vibration >= 20 ? 'Critical' : vibration >= 10 ? 'Warning' : 'Normal';
+  return `[TABLE]\nSensor | Reading | Status\n--- | --- | ---\nTemperature | ${temp}C | ${tS}\nHumidity | ${hum}% | ${hS}\nPressure | ${press}hPa | ${pS}\nGas Quality | ${gas} | ${gS}\nVibration | ${vibration} | ${vS}\n[/TABLE]`;
 }
 
 export async function OPTIONS() {
@@ -251,8 +252,8 @@ Please feel free to ask me anything within these areas, and I will be happy to a
       if (dbReadings.length > 0) {
         const latest = dbReadings[0] as any;
         const d = latest.data || {};
-        sensorData = `Latest Sensors: Temp=${d.temprature ?? d.temperature ?? 0}C, Hum=${d.humidity ?? 0}%, Press=${d.pressure ?? 102}hPa, Gas=${d.gas_quality ?? 0}.`;
-        table = formatSensorTable(d.temprature ?? d.temperature ?? 0, d.humidity ?? 0, d.pressure ?? 102, d.gas_quality ?? 0);
+        sensorData = `Latest Sensors: Temp=${d.temprature ?? d.temperature ?? 0}C, Hum=${d.humidity ?? 0}%, Press=${d.pressure ?? 102}hPa, Gas=${d.gas_quality ?? 0}, Vibration=${d.vibration ?? 0}.`;
+        table = formatSensorTable(d.temprature ?? d.temperature ?? 0, d.humidity ?? 0, d.pressure ?? 102, d.gas_quality ?? 0, d.vibration ?? 0);
         mlContext = await fetchMLPredictions([...dbReadings].reverse());
       }
     } catch (err) {

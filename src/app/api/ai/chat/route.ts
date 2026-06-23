@@ -10,16 +10,19 @@ import { groqFetch } from '@/lib/groq-fetch';
 // ── Sensor thresholds (must match DashboardContent.tsx) ────────────────────
 function getSensorStatus(key: string, value: number): string {
   if (key === 'temperature') {
-    return value > 45 ? 'Critical' : value > 38 ? 'High' : 'Normal';
+    return value >= 55 ? 'Critical' : value >= 45 ? 'High' : 'Normal';
   }
   if (key === 'humidity') {
-    return value > 85 ? 'Critical' : value > 75 ? 'High' : 'Normal';
+    return value >= 95 ? 'Critical' : value >= 85 ? 'High' : 'Normal';
   }
   if (key === 'pressure') {
-    return value < 98 || value > 106 ? 'Critical' : value < 100 || value > 104 ? 'High' : 'Normal';
+    return value < 90 || value > 115 ? 'Critical' : value < 95 || value > 110 ? 'High' : 'Normal';
   }
   if (key === 'gas_quality') {
-    return value > 500 ? 'Critical' : value > 200 ? 'High' : 'Normal';
+    return value >= 700 ? 'Critical' : value >= 600 ? 'High' : 'Normal';
+  }
+  if (key === 'vibration') {
+    return value >= 20 ? 'Critical' : value >= 10 ? 'High' : 'Normal';
   }
   return 'Unknown';
 }
@@ -77,6 +80,7 @@ function buildRAGContext(dataArray: any[]): string {
   const humids = recent.map((r: any) => r.data?.humidity).filter((v: any) => v != null);
   const pressures = recent.map((r: any) => r.data?.pressure).filter((v: any) => v != null);
   const gases = recent.map((r: any) => r.data?.gas_quality).filter((v: any) => v != null);
+  const vibrations = recent.map((r: any) => r.data?.vibration).filter((v: any) => v != null);
 
   const avg = (arr: number[]) => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2) : 'N/A';
   const min = (arr: number[]) => arr.length ? Math.min(...arr).toFixed(2) : 'N/A';
@@ -90,7 +94,7 @@ function buildRAGContext(dataArray: any[]): string {
 
   const rawLog = recent.slice(-5).map((r: any) => {
     const time = new Date(r._uploadedAt || r.timestamp).toLocaleTimeString();
-    return `[${time}] T:${r.data?.temperature ?? r.data?.temprature}C, H:${r.data?.humidity}%, P:${r.data?.pressure}hPa, G:${r.data?.gas_quality ?? r.data?.gasQuality}`;
+    return `[${time}] T:${r.data?.temperature ?? r.data?.temprature}C, H:${r.data?.humidity}%, P:${r.data?.pressure}hPa, G:${r.data?.gas_quality ?? r.data?.gasQuality}, V:${r.data?.vibration ?? 0}`;
   }).join('\n');
 
   return `
@@ -99,17 +103,19 @@ HISTORICAL CONTEXT (Last ${recent.length} readings):
 - Humidity    : avg=${avg(humids)}% | min=${min(humids)} | max=${max(humids)} | trend=${trend(humids)}
 - Pressure    : avg=${avg(pressures)} hPa | min=${min(pressures)} | max=${max(pressures)} | trend=${trend(pressures)}
 - Gas Quality : avg=${avg(gases)} | min=${min(gases)} | max=${max(gases)} | trend=${trend(gases)}
+- Vibration   : avg=${avg(vibrations)} | min=${min(vibrations)} | max=${max(vibrations)} | trend=${trend(vibrations)}
 
 RECENT RAW LOGS:
 ${rawLog}`;
 }
 
 // ── Format sensor table from live computed data ─────────────────────────────
-function formatSensorTable(temp: number, humidity: number, pressure: number, gas: number): string {
-  const tS = temp > 45 ? 'Critical' : temp > 38 ? 'Warning' : 'Normal';
-  const hS = humidity > 85 ? 'Critical' : humidity > 75 ? 'Warning' : 'Normal';
-  const pS = pressure < 98 || pressure > 106 ? 'Critical' : pressure < 100 || pressure > 104 ? 'Warning' : 'Normal';
-  const gS = gas > 500 ? 'Critical' : gas > 200 ? 'Warning' : 'Normal';
+function formatSensorTable(temp: number, humidity: number, pressure: number, gas: number, vibration: number): string {
+  const tS = temp >= 55 ? 'Critical' : temp >= 45 ? 'Warning' : 'Normal';
+  const hS = humidity >= 95 ? 'Critical' : humidity >= 85 ? 'Warning' : 'Normal';
+  const pS = pressure < 90 || pressure > 115 ? 'Critical' : pressure < 95 || pressure > 110 ? 'Warning' : 'Normal';
+  const gS = gas >= 700 ? 'Critical' : gas >= 600 ? 'Warning' : 'Normal';
+  const vS = vibration >= 20 ? 'Critical' : vibration >= 10 ? 'Warning' : 'Normal';
   return `[TABLE]
 Sensor | Reading | Status
 --- | --- | ---
@@ -117,21 +123,23 @@ Temperature | ${temp} degrees C | ${tS}
 Humidity | ${humidity} % | ${hS}
 Pressure | ${pressure} hPa | ${pS}
 Gas Quality | ${gas} | ${gS}
+Vibration | ${vibration} | ${vS}
 [/TABLE]`;
 }
 
 // ── Format averages text from live computed data ────────────────────────────
-function formatAverages(avgTemp: string, avgHumidity: string, avgPressure: string, avgGas: string): string {
+function formatAverages(avgTemp: string, avgHumidity: string, avgPressure: string, avgGas: string, avgVibration: string): string {
   return `The averages over the last 20 readings are:
 - Average Temperature: ${avgTemp} C
 - Average Humidity: ${avgHumidity} %
 - Average Pressure: ${avgPressure} hPa
-- Average Gas Quality: ${avgGas}`;
+- Average Gas Quality: ${avgGas}
+- Average Vibration: ${avgVibration}`;
 }
 
 // ── Format chart examples from live computed data ─────────────────────────
 function formatChartExamples(
-  temp: number, humidity: number, pressure: number, gas: number,
+  temp: number, humidity: number, pressure: number, gas: number, vibration: number,
   normalCount: number, warningCount: number, criticalCount: number,
   tempHistory: number[]
 ): string {
@@ -148,6 +156,7 @@ Temperature: ${temp}
 Humidity: ${humidity}
 Pressure: ${pressure}
 Gas Quality: ${gas}
+Vibration: ${vibration}
 [/CHART]
 
 LINE CHART example (use real historical values like these):
@@ -318,7 +327,7 @@ Please feel free to ask me anything within these areas, and I will be happy to a
         const last20 = dataArray.slice(-20);
 
         // Extract and classify each row individually
-        const rowReports: { ts: string; temp: number; humidity: number; pressure: number; gas: number; status: string; details: string }[] = [];
+        const rowReports: { ts: string; temp: number; humidity: number; pressure: number; gas: number; vibration: number; status: string; details: string }[] = [];
 
         for (const row of last20) {
           const d = row.data || {};
@@ -326,31 +335,34 @@ Please feel free to ask me anything within these areas, and I will be happy to a
           const humidity = parseFloat(String(d.humidity ?? 0));
           const pressure = parseFloat(String(d.pressure ?? 102));
           const gas = parseFloat(String(d.gas_quality ?? d.gasQuality ?? 0));
+          const vibration = parseFloat(String(d.vibration ?? 0));
           const ts = (row._uploadedAt || row.timestamp) ? new Date(row._uploadedAt || row.timestamp).toLocaleTimeString() : 'N/A';
 
           // Same threshold logic as ReportsProvider
           let status = 'Normal';
           let details = 'All parameters within normal range';
 
-          if (temp > 45 || humidity > 85 || pressure < 98 || pressure > 106 || gas > 500) {
+          if (temp >= 55 || humidity >= 95 || pressure < 90 || pressure > 115 || gas >= 700 || vibration >= 20) {
             status = 'Critical';
             const parts: string[] = [];
-            if (temp > 45) parts.push(`Temp ${temp.toFixed(1)}C`);
-            if (humidity > 85) parts.push(`Humidity ${humidity.toFixed(1)}%`);
-            if (pressure < 98 || pressure > 106) parts.push(`Pressure ${pressure}hPa`);
-            if (gas > 500) parts.push(`Gas ${gas}`);
+            if (temp >= 55) parts.push(`Temp ${temp.toFixed(1)}C`);
+            if (humidity >= 95) parts.push(`Humidity ${humidity.toFixed(1)}%`);
+            if (pressure < 90 || pressure > 115) parts.push(`Pressure ${pressure}hPa`);
+            if (gas >= 700) parts.push(`Gas ${gas}`);
+            if (vibration >= 20) parts.push(`Vibration ${vibration}`);
             details = `Critical: ${parts.join(', ')}`;
-          } else if (temp > 38 || humidity > 75 || pressure < 100 || pressure > 104 || gas > 200) {
+          } else if (temp >= 45 || humidity >= 85 || pressure < 95 || pressure > 110 || gas >= 600 || vibration >= 10) {
             status = 'Warning';
             const parts: string[] = [];
-            if (temp > 38) parts.push(`Temp ${temp.toFixed(1)}C`);
-            if (humidity > 75) parts.push(`Humidity ${humidity.toFixed(1)}%`);
-            if (pressure < 100 || pressure > 104) parts.push(`Pressure ${pressure}hPa`);
-            if (gas > 200) parts.push(`Gas ${gas}`);
+            if (temp >= 45) parts.push(`Temp ${temp.toFixed(1)}C`);
+            if (humidity >= 85) parts.push(`Humidity ${humidity.toFixed(1)}%`);
+            if (pressure < 95 || pressure > 110) parts.push(`Pressure ${pressure}hPa`);
+            if (gas >= 600) parts.push(`Gas ${gas}`);
+            if (vibration >= 10) parts.push(`Vibration ${vibration}`);
             details = `Warning: ${parts.join(', ')}`;
           }
 
-          rowReports.push({ ts, temp, humidity, pressure, gas, status, details });
+          rowReports.push({ ts, temp, humidity, pressure, gas, vibration, status, details });
         }
 
         // ── Compute dominant status across all 20 rows ──────────────────
@@ -378,14 +390,15 @@ Please feel free to ask me anything within these areas, and I will be happy to a
         const avgHumidity = (rowReports.reduce((s, r) => s + r.humidity, 0) / rowReports.length).toFixed(1);
         const avgPressure = (rowReports.reduce((s, r) => s + r.pressure, 0) / rowReports.length).toFixed(1);
         const avgGas = (rowReports.reduce((s, r) => s + r.gas, 0) / rowReports.length).toFixed(0);
+        const avgVibration = (rowReports.reduce((s, r) => s + r.vibration, 0) / rowReports.length).toFixed(1);
 
         // ── Pre-build table + averages + charts from real data ──────────────
         const latest = rowReports[rowReports.length - 1];
-        const preBuiltTable = formatSensorTable(latest.temp, latest.humidity, latest.pressure, latest.gas);
-        const preBuiltAverages = formatAverages(avgTemp, avgHumidity, avgPressure, avgGas);
+        const preBuiltTable = formatSensorTable(latest.temp, latest.humidity, latest.pressure, latest.gas, latest.vibration);
+        const preBuiltAverages = formatAverages(avgTemp, avgHumidity, avgPressure, avgGas, avgVibration);
         const tempHistory = rowReports.map(r => r.temp);
         preBuiltCharts = formatChartExamples(
-          latest.temp, latest.humidity, latest.pressure, latest.gas,
+          latest.temp, latest.humidity, latest.pressure, latest.gas, latest.vibration,
           normalCount, warningCount, criticalCount, tempHistory
         );
 
@@ -395,7 +408,7 @@ Please feel free to ask me anything within these areas, and I will be happy to a
 
         // ── Per-row status log (last 5 rows for detail) ─────────────────
         const recentLog = rowReports.slice(-5).map(r =>
-          `[${r.ts}] T:${r.temp}C H:${r.humidity}% P:${r.pressure}hPa G:${r.gas} -> ${r.status}`
+          `[${r.ts}] T:${r.temp}C H:${r.humidity}% P:${r.pressure}hPa G:${r.gas} V:${r.vibration} -> ${r.status}`
         ).join('\n');
 
         latestSensorData = `
@@ -405,16 +418,18 @@ DOMINANT STATUS (last 20 readings): ${dominantStatus}
 Status Distribution: Normal=${normalCount}/20 | Warning=${warningCount}/20 | Critical=${criticalCount}/20
 
 CURRENT LATEST READING:
-- Temperature : ${latest.temp} C -> Status: ${latest.temp > 45 ? 'Critical' : latest.temp > 38 ? 'Warning' : 'Normal'}
-- Humidity    : ${latest.humidity} % -> Status: ${latest.humidity > 85 ? 'Critical' : latest.humidity > 75 ? 'Warning' : 'Normal'}
-- Pressure    : ${latest.pressure} hPa -> Status: ${latest.pressure < 98 || latest.pressure > 106 ? 'Critical' : latest.pressure < 100 || latest.pressure > 104 ? 'Warning' : 'Normal'}
-- Gas Quality : ${latest.gas} -> Status: ${latest.gas > 500 ? 'Critical' : latest.gas > 200 ? 'Warning' : 'Normal'}
+- Temperature : ${latest.temp} C -> Status: ${latest.temp >= 55 ? 'Critical' : latest.temp >= 45 ? 'Warning' : 'Normal'}
+- Humidity    : ${latest.humidity} % -> Status: ${latest.humidity >= 95 ? 'Critical' : latest.humidity >= 85 ? 'Warning' : 'Normal'}
+- Pressure    : ${latest.pressure} hPa -> Status: ${latest.pressure < 90 || latest.pressure > 115 ? 'Critical' : latest.pressure < 95 || latest.pressure > 110 ? 'Warning' : 'Normal'}
+- Gas Quality : ${latest.gas} -> Status: ${latest.gas >= 700 ? 'Critical' : latest.gas >= 600 ? 'Warning' : 'Normal'}
+- Vibration   : ${latest.vibration} -> Status: ${latest.vibration >= 20 ? 'Critical' : latest.vibration >= 10 ? 'Warning' : 'Normal'}
 
 AVERAGES (last 20 readings):
 - Avg Temperature : ${avgTemp} C
 - Avg Humidity    : ${avgHumidity} %
 - Avg Pressure    : ${avgPressure} hPa
 - Avg Gas Quality : ${avgGas}
+- Avg Vibration   : ${avgVibration}
 
 RECENT READINGS LOG (last 5):
 ${recentLog}
@@ -576,8 +591,9 @@ INFERENCE RULES you MUST apply when relevant:
 2. If Gas Quality is High/Critical -> Suspect ventilation failure or chemical leak. Combine with humidity.
 3. If Temperature is rising while Pressure is falling -> Likely heat exchanger issue or coolant loss.
 4. If Humidity is High + Temperature normal -> Condensation risk, electrical short-circuit hazard.
-5. If all sensors are Normal + Stable -> Report clean health status with no action needed.
-6. Always cross-link related sensors: Temperature <-> Pressure, Humidity <-> Gas Quality.
+5. If Vibration is High/Critical -> Suspect mechanical failure, loose bearing, or motor imbalance.
+6. If all sensors are Normal + Stable -> Report clean health status with no action needed.
+7. Always cross-link related sensors: Temperature <-> Pressure, Humidity <-> Gas Quality, Vibration <-> Temperature.
 
 
 ══════════════════════════════════════════════════

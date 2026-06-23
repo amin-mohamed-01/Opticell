@@ -38,7 +38,8 @@ export async function GET(req: NextRequest) {
       temperature: d?.temperature ?? d?.temprature ?? 0,
       humidity: d?.humidity ?? 0,
       pressure: d?.pressure ?? 102,
-      gas_quality: d?.gas_quality ?? d?.gasQuality ?? 0
+      gas_quality: d?.gas_quality ?? d?.gasQuality ?? 0,
+      vibration: d?.vibration ?? 0
     });
 
     // Check if the result already has the 'prediction' wrapper (new format)

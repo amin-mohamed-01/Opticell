@@ -53,16 +53,18 @@ export default function DashboardContent() {
   // ── Alert reasons ─────────────────────────────────────────────────────────
   const reasons: string[] = [];
   if (latestData) {
-    const { temperature, humidity, pressure, gasQuality } = latestData;
+    const { temperature, humidity, pressure, gasQuality, vibration } = latestData;
     if (!isNormal) {
-      if (temperature > 45) reasons.push(`Temp critically high (${temperature.toFixed(1)}°C)`);
-      else if (temperature > 38) reasons.push(`Temp high (${temperature.toFixed(1)}°C)`);
-      if (humidity > 85) reasons.push(`Humidity critically high (${humidity.toFixed(1)}%)`);
-      else if (humidity > 75) reasons.push(`Humidity high (${humidity.toFixed(1)}%)`);
-      if (pressure < 98 || pressure > 106) reasons.push(`Pressure out of range (${pressure} hPa)`);
-      else if (pressure < 100 || pressure > 104) reasons.push(`Pressure abnormal (${pressure} hPa)`);
-      if (gasQuality > 500) reasons.push(`Gas quality critical (${gasQuality})`);
-      else if (gasQuality > 200) reasons.push(`Gas quality elevated (${gasQuality})`);
+      if (temperature >= 55) reasons.push(`Temp critically high (${temperature.toFixed(1)}°C)`);
+      else if (temperature >= 45) reasons.push(`Temp high (${temperature.toFixed(1)}°C)`);
+      if (humidity >= 95) reasons.push(`Humidity critically high (${humidity.toFixed(1)}%)`);
+      else if (humidity >= 85) reasons.push(`Humidity high (${humidity.toFixed(1)}%)`);
+      if (pressure < 90 || pressure > 115) reasons.push(`Pressure out of range (${pressure} hPa)`);
+      else if (pressure < 95 || pressure > 110) reasons.push(`Pressure abnormal (${pressure} hPa)`);
+      if (gasQuality >= 700) reasons.push(`Gas quality critical (${gasQuality})`);
+      else if (gasQuality >= 600) reasons.push(`Gas quality elevated (${gasQuality})`);
+      if (vibration >= 20) reasons.push(`Vibration critical (${vibration})`);
+      else if (vibration >= 10) reasons.push(`Vibration elevated (${vibration})`);
     }
   }
 
@@ -73,7 +75,7 @@ export default function DashboardContent() {
         <h1 className="text-3xl font-bold text-gray-900">OptiCell Bioreactor Dashboard</h1>
         <p className="text-gray-600 mt-2 flex items-center gap-2">
           <Bell className="w-4 h-4 text-green-500 animate-pulse" />
-          Live streaming • Temperature · Humidity · Pressure · Gas Quality
+          Live streaming • Temperature · Humidity · Pressure · Gas Quality · Vibration
         </p>
       </div>
 
@@ -112,6 +114,7 @@ export default function DashboardContent() {
                   { color: 'bg-teal-500',   label: 'Humidity' },
                   { color: 'bg-purple-500', label: 'Pressure' },
                   { color: 'bg-orange-500', label: 'Gas' },
+                  { color: 'bg-pink-500', label: 'Vibration' },
                 ].map(({ color, label }) => (
                   <span key={label} className="flex items-center gap-1.5">
                     <div className={`h-3 w-3 rounded-full ${color}`} />
@@ -150,17 +153,22 @@ export default function DashboardContent() {
                     <stop offset="5%"  stopColor="#f97316" stopOpacity={0.6}/>
                     <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
                   </linearGradient>
+                  <linearGradient id="vibGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%"  stopColor="#ec4899" stopOpacity={0.6}/>
+                    <stop offset="95%" stopColor="#ec4899" stopOpacity={0}/>
+                  </linearGradient>
                 </defs>
 
                 <Area yAxisId="left"  type="monotone" dataKey="temperature" stroke="#3b82f6" fill="url(#tempGradient)"  strokeWidth={2} name="Temperature (°C)" />
                 <Area yAxisId="right" type="monotone" dataKey="humidity"    stroke="#14b8a6" fill="url(#humGradient)"   strokeWidth={2} name="Humidity (%)" />
                 <Area yAxisId="left"  type="monotone" dataKey="pressure"    stroke="#a855f7" fill="url(#pressGradient)" strokeWidth={2} name="Pressure (hPa)" />
                 <Area yAxisId="right" type="monotone" dataKey="gasQuality"  stroke="#f97316" fill="url(#gasGradient)"  strokeWidth={2} name="Gas Quality" />
+                <Area yAxisId="right" type="monotone" dataKey="vibration"  stroke="#ec4899" fill="url(#vibGradient)"  strokeWidth={2} name="Vibration" />
               </AreaChart>
             </ResponsiveContainer>
 
             {latestData && (
-              <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="mt-6 grid grid-cols-2 sm:grid-cols-5 gap-4">
                 <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
                   <p className="text-xs text-gray-500">Temperature</p>
                   <p className="text-xl font-bold text-blue-600">{latestData.temperature.toFixed(1)} °C</p>
@@ -176,6 +184,10 @@ export default function DashboardContent() {
                 <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
                   <p className="text-xs text-gray-500">Gas Quality</p>
                   <p className="text-xl font-bold text-orange-600">{latestData.gasQuality}</p>
+                </div>
+                <div className="text-center p-3 bg-pink-50 rounded-lg border border-pink-200">
+                  <p className="text-xs text-gray-500">Vibration</p>
+                  <p className="text-xl font-bold text-pink-600">{latestData.vibration}</p>
                 </div>
               </div>
             )}

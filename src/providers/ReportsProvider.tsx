@@ -13,6 +13,7 @@ export type Report = {
   humidity: number;
   pressure: number;
   gasQuality: number;
+  vibration: number;
   equipment: string;
 };
 
@@ -25,35 +26,37 @@ interface ReportsContextType {
 const ReportsContext = createContext<ReportsContextType | undefined>(undefined);
 
 // ── Status logic (mirrors DashboardProvider) ──────────────────────────────────
-function getStatusAndDetails(temp: number, humidity: number, pressure: number, gas: number): {
+function getStatusAndDetails(temp: number, humidity: number, pressure: number, gas: number, vibration: number): {
   status: Report['status'];
   details: string;
 } {
   const parts: string[] = [];
 
   // Critical check
-  if (temp > 45) parts.push(`Temp ${temp.toFixed(1)}°C`);
-  if (humidity > 85) parts.push(`Humidity ${humidity.toFixed(1)}%`);
-  if (pressure < 98 || pressure > 106) parts.push(`Pressure ${pressure} hPa`);
-  if (gas > 500) parts.push(`Gas ${gas}`);
+  if (temp >= 55) parts.push(`Temp ${temp.toFixed(1)}°C`);
+  if (humidity >= 95) parts.push(`Humidity ${humidity.toFixed(1)}%`);
+  if (pressure < 90 || pressure > 115) parts.push(`Pressure ${pressure} hPa`);
+  if (gas >= 700) parts.push(`Gas ${gas}`);
+  if (vibration >= 20) parts.push(`Vibration ${vibration}`);
 
   if (
-    temp > 45 || humidity > 85 ||
-    pressure < 98 || pressure > 106 ||
-    gas > 500
+    temp >= 55 || humidity >= 95 ||
+    pressure < 90 || pressure > 115 ||
+    gas >= 700 || vibration >= 20
   ) return { status: 'Critical', details: `⛔ Critical: ${parts.join(', ')}` };
 
   // Warning check
   parts.length = 0;
-  if (temp > 38) parts.push(`Temp ${temp.toFixed(1)}°C`);
-  if (humidity > 75) parts.push(`Humidity ${humidity.toFixed(1)}%`);
-  if (pressure < 100 || pressure > 104) parts.push(`Pressure ${pressure} hPa`);
-  if (gas > 200) parts.push(`Gas ${gas}`);
+  if (temp >= 45) parts.push(`Temp ${temp.toFixed(1)}°C`);
+  if (humidity >= 85) parts.push(`Humidity ${humidity.toFixed(1)}%`);
+  if (pressure < 95 || pressure > 110) parts.push(`Pressure ${pressure} hPa`);
+  if (gas >= 600) parts.push(`Gas ${gas}`);
+  if (vibration >= 10) parts.push(`Vibration ${vibration}`);
 
   if (
-    temp > 38 || humidity > 75 ||
-    pressure < 100 || pressure > 104 ||
-    gas > 200
+    temp >= 45 || humidity >= 85 ||
+    pressure < 95 || pressure > 110 ||
+    gas >= 600 || vibration >= 10
   ) return { status: 'Warning', details: `⚠️ Warning: ${parts.join(', ')}` };
 
   return { status: 'Normal', details: 'All parameters within normal range' };
@@ -64,11 +67,13 @@ function extractFields(data: Record<string, number | string>) {
   const humidity = parseFloat(String(data['humidity'] ?? 0));
   const pressure = parseFloat(String(data['pressure'] ?? 102));
   const gas = parseFloat(String(data['gas_quality'] ?? data['gasQuality'] ?? 0));
+  const vibration = parseFloat(String(data['vibration'] ?? 0));
   return {
     temp: isNaN(temp) ? 0 : Math.round(temp * 10) / 10,
     humidity: isNaN(humidity) ? 0 : Math.round(humidity * 10) / 10,
     pressure: isNaN(pressure) ? 102 : pressure,
     gas: isNaN(gas) ? 0 : gas,
+    vibration: isNaN(vibration) ? 0 : vibration,
   };
 }
 
@@ -93,10 +98,10 @@ export const ReportsProvider = ({ children }: { children: ReactNode }) => {
     const processRow = (doc: any) => {
       if (!doc.data) return;
 
-      const { temp, humidity, pressure, gas } = extractFields(doc.data);
+      const { temp, humidity, pressure, gas, vibration } = extractFields(doc.data);
       if (isNaN(temp) || isNaN(humidity)) return;
 
-      const { status, details } = getStatusAndDetails(temp, humidity, pressure, gas);
+      const { status, details } = getStatusAndDetails(temp, humidity, pressure, gas, vibration);
 
       reportCounterRef.current += 1;
       const batchId = `B${String(reportCounterRef.current).padStart(5, '0')}`;
@@ -110,6 +115,7 @@ export const ReportsProvider = ({ children }: { children: ReactNode }) => {
         humidity,
         pressure,
         gasQuality: gas,
+        vibration,
         equipment: `Sensor-${doc.sensorId ?? 1}`,
       };
 

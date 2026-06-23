@@ -11,6 +11,7 @@ export interface SensorData {
   humidity: number;
   pressure: number;
   gasQuality: number;
+  vibration: number;
   equipment: string;
 }
 
@@ -22,7 +23,7 @@ interface BatchReport {
 }
 
 interface DashboardState {
-  chartData: { time: string; temperature: number; humidity: number; pressure: number; gasQuality: number }[];
+  chartData: { time: string; temperature: number; humidity: number; pressure: number; gasQuality: number; vibration: number }[];
   currentStatus: number;
   latestData: SensorData | null;
   batchReports: BatchReport[];
@@ -36,18 +37,20 @@ const DashboardContext = createContext<DashboardState | undefined>(undefined);
 export function getStatusFromData(d: SensorData): 'normal' | 'warning' | 'critical' {
   // Critical thresholds
   if (
-    d.temperature > 45 ||
-    d.humidity > 85 ||
-    d.pressure < 98 || d.pressure > 106 ||
-    d.gasQuality > 500
+    d.temperature >= 55 ||
+    d.humidity >= 95 ||
+    d.pressure < 90 || d.pressure > 115 ||
+    d.gasQuality >= 700 ||
+    d.vibration >= 20
   ) return 'critical';
 
   // Warning thresholds
   if (
-    d.temperature > 38 ||
-    d.humidity > 75 ||
-    d.pressure < 100 || d.pressure > 104 ||
-    d.gasQuality > 200
+    d.temperature >= 45 ||
+    d.humidity >= 85 ||
+    d.pressure < 95 || d.pressure > 110 ||
+    d.gasQuality >= 600 ||
+    d.vibration >= 10
   ) return 'warning';
 
   return 'normal';
@@ -57,21 +60,25 @@ export function calculateHealthScore(d: SensorData): number {
   let score = 100;
 
   // Temperature
-  if (d.temperature > 55) score -= 40;
-  else if (d.temperature > 45) score -= 28;
-  else if (d.temperature > 38) score -= 12;
+  if (d.temperature >= 65) score -= 40;
+  else if (d.temperature >= 55) score -= 28;
+  else if (d.temperature >= 45) score -= 12;
 
   // Humidity
-  if (d.humidity > 85) score -= 25;
-  else if (d.humidity > 75) score -= 12;
+  if (d.humidity >= 95) score -= 25;
+  else if (d.humidity >= 85) score -= 12;
 
   // Pressure
-  if (d.pressure < 96 || d.pressure > 108) score -= 20;
-  else if (d.pressure < 100 || d.pressure > 104) score -= 10;
+  if (d.pressure < 90 || d.pressure > 115) score -= 20;
+  else if (d.pressure < 95 || d.pressure > 110) score -= 10;
 
   // Gas Quality
-  if (d.gasQuality > 500) score -= 25;
-  else if (d.gasQuality > 200) score -= 12;
+  if (d.gasQuality >= 700) score -= 25;
+  else if (d.gasQuality >= 600) score -= 12;
+
+  // Vibration
+  if (d.vibration >= 20) score -= 25;
+  else if (d.vibration >= 10) score -= 12;
 
   return Math.max(0, Math.min(100, Math.round(score)));
 }
@@ -94,6 +101,7 @@ function parseReading(doc: {
   const humidity = parseFloat(String(d['humidity'] ?? 0));
   const pressure = parseFloat(String(d['pressure'] ?? 102));
   const gasQuality = parseFloat(String(d['gas_quality'] ?? d['gasQuality'] ?? 0));
+  const vibration = parseFloat(String(d['vibration'] ?? 0));
 
   if (isNaN(temperature) || isNaN(humidity)) return null;
 
@@ -103,6 +111,7 @@ function parseReading(doc: {
     humidity,
     pressure: isNaN(pressure) ? 102 : pressure,
     gasQuality: isNaN(gasQuality) ? 0 : gasQuality,
+    vibration: isNaN(vibration) ? 0 : vibration,
     equipment: `Sensor-${doc.sensorId ?? 1}`,
   };
 }
@@ -137,6 +146,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
           humidity: row.humidity,
           pressure: row.pressure,
           gasQuality: row.gasQuality,
+          vibration: row.vibration,
         }].slice(-30);
       });
 
@@ -204,19 +214,21 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 // ─── Detail helpers ───────────────────────────────────────────────────────────
 function buildCriticalDetails(d: SensorData): string {
   const parts: string[] = [];
-  if (d.temperature > 45) parts.push(`Temp ${d.temperature.toFixed(1)}°C`);
-  if (d.humidity > 85) parts.push(`Humidity ${d.humidity.toFixed(1)}%`);
-  if (d.pressure < 98 || d.pressure > 106) parts.push(`Pressure ${d.pressure} hPa`);
-  if (d.gasQuality > 500) parts.push(`Gas ${d.gasQuality}`);
+  if (d.temperature >= 55) parts.push(`Temp ${d.temperature.toFixed(1)}°C`);
+  if (d.humidity >= 95) parts.push(`Humidity ${d.humidity.toFixed(1)}%`);
+  if (d.pressure < 90 || d.pressure > 115) parts.push(`Pressure ${d.pressure} hPa`);
+  if (d.gasQuality >= 700) parts.push(`Gas ${d.gasQuality}`);
+  if (d.vibration >= 20) parts.push(`Vibration ${d.vibration}`);
   return parts.length ? `⛔ Critical: ${parts.join(', ')}` : 'Critical deviation detected';
 }
 
 function buildWarningDetails(d: SensorData): string {
   const parts: string[] = [];
-  if (d.temperature > 38) parts.push(`Temp ${d.temperature.toFixed(1)}°C`);
-  if (d.humidity > 75) parts.push(`Humidity ${d.humidity.toFixed(1)}%`);
-  if (d.pressure < 100 || d.pressure > 104) parts.push(`Pressure ${d.pressure} hPa`);
-  if (d.gasQuality > 200) parts.push(`Gas ${d.gasQuality}`);
+  if (d.temperature >= 45) parts.push(`Temp ${d.temperature.toFixed(1)}°C`);
+  if (d.humidity >= 85) parts.push(`Humidity ${d.humidity.toFixed(1)}%`);
+  if (d.pressure < 95 || d.pressure > 110) parts.push(`Pressure ${d.pressure} hPa`);
+  if (d.gasQuality >= 600) parts.push(`Gas ${d.gasQuality}`);
+  if (d.vibration >= 10) parts.push(`Vibration ${d.vibration}`);
   return parts.length ? `⚠️ Warning: ${parts.join(', ')}` : 'Parameters approaching limits';
 }
 

@@ -38,6 +38,7 @@ export default function ReportsContent() {
       'Humidity (%)': r.humidity.toFixed(1),
       'Pressure (hPa)': r.pressure,
       'Gas Quality': r.gasQuality,
+      'Vibration': r.vibration,
       Details: r.details,
     }));
 
@@ -116,7 +117,7 @@ export default function ReportsContent() {
                 <tr>
                   {[
                     'Timestamp', 'Batch ID', 'Status',
-                    'Temperature', 'Humidity', 'Pressure', 'Gas Quality',
+                    'Temperature', 'Humidity', 'Pressure', 'Gas Quality', 'Vibration',
                     'Details',
                   ].map((h) => (
                     <th
@@ -151,31 +152,38 @@ export default function ReportsContent() {
                       </td>
                       {/* Temperature — color coded */}
                       <td className={`px-6 py-4 text-sm font-medium ${
-                        report.temp > 45 ? 'text-red-600' :
-                        report.temp > 38 ? 'text-yellow-600' : 'text-gray-900'
+                        report.temp >= 55 ? 'text-red-600' :
+                        report.temp >= 45 ? 'text-yellow-600' : 'text-gray-900'
                       }`}>
                         {report.temp.toFixed(1)} °C
                       </td>
                       {/* Humidity */}
                       <td className={`px-6 py-4 text-sm font-medium ${
-                        report.humidity > 85 ? 'text-red-600' :
-                        report.humidity > 75 ? 'text-yellow-600' : 'text-gray-900'
+                        report.humidity >= 95 ? 'text-red-600' :
+                        report.humidity >= 85 ? 'text-yellow-600' : 'text-gray-900'
                       }`}>
                         {report.humidity.toFixed(1)} %
                       </td>
                       {/* Pressure */}
                       <td className={`px-6 py-4 text-sm font-medium ${
-                        (report.pressure < 98 || report.pressure > 106) ? 'text-red-600' :
-                        (report.pressure < 100 || report.pressure > 104) ? 'text-yellow-600' : 'text-gray-900'
+                        (report.pressure < 90 || report.pressure > 115) ? 'text-red-600' :
+                        (report.pressure < 95 || report.pressure > 110) ? 'text-yellow-600' : 'text-gray-900'
                       }`}>
                         {report.pressure} hPa
                       </td>
                       {/* Gas Quality */}
                       <td className={`px-6 py-4 text-sm font-medium ${
-                        report.gasQuality > 500 ? 'text-red-600' :
-                        report.gasQuality > 200 ? 'text-yellow-600' : 'text-gray-900'
+                        report.gasQuality >= 700 ? 'text-red-600' :
+                        report.gasQuality >= 600 ? 'text-yellow-600' : 'text-gray-900'
                       }`}>
                         {report.gasQuality}
+                      </td>
+                      {/* Vibration */}
+                      <td className={`px-6 py-4 text-sm font-medium ${
+                        report.vibration >= 20 ? 'text-red-600' :
+                        report.vibration >= 10 ? 'text-yellow-600' : 'text-gray-900'
+                      }`}>
+                        {report.vibration}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600 max-w-xs">
                         {report.details}

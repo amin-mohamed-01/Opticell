@@ -10,10 +10,11 @@ const ML_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const REQUEST_TIMEOUT_MS = 120_000;
 
 function getSensorStatus(key: string, value: number): string {
-  if (key === "temperature") return value > 45 ? "Critical" : value > 38 ? "High" : "Normal";
-  if (key === "humidity") return value > 85 ? "Critical" : value > 75 ? "High" : "Normal";
-  if (key === "pressure") return value < 98 || value > 106 ? "Critical" : value < 100 || value > 104 ? "High" : "Normal";
-  if (key === "gas_quality") return value > 500 ? "Critical" : value > 200 ? "High" : "Normal";
+  if (key === "temperature") return value >= 55 ? "Critical" : value >= 45 ? "High" : "Normal";
+  if (key === "humidity") return value >= 95 ? "Critical" : value >= 85 ? "High" : "Normal";
+  if (key === "pressure") return value < 90 || value > 115 ? "Critical" : value < 95 || value > 110 ? "High" : "Normal";
+  if (key === "gas_quality") return value >= 700 ? "Critical" : value >= 600 ? "High" : "Normal";
+  if (key === "vibration") return value >= 20 ? "Critical" : value >= 10 ? "High" : "Normal";
   return "Unknown";
 }
 
@@ -29,6 +30,7 @@ async function fetchMLContext(dataArray: any[]): Promise<string> {
         humidity: d.humidity ?? 0,
         pressure: d.pressure ?? 102,
         gas_quality: d.gas_quality ?? d.gasQuality ?? 0,
+        vibration: d.vibration ?? 0,
       };
     });
 
@@ -94,7 +96,8 @@ async function buildSensorContext(): Promise<string> {
     const hS = d.humidity != null ? getSensorStatus("humidity", d.humidity) : "N/A";
     const pS = d.pressure != null ? getSensorStatus("pressure", d.pressure) : "N/A";
     const gS = d.gas_quality != null ? getSensorStatus("gas_quality", d.gas_quality) : "N/A";
-    const allS = [tS, hS, pS, gS];
+    const vS = d.vibration != null ? getSensorStatus("vibration", d.vibration) : "N/A";
+    const allS = [tS, hS, pS, gS, vS];
     const overall = allS.includes("Critical") ? "CRITICAL" : allS.includes("High") ? "WARNING" : "NORMAL";
     const recent = dataArray.slice(-20);
     const avg = (arr: number[]) => arr.length ? (arr.reduce((a: number, b: number) => a + b, 0) / arr.length).toFixed(2) : "N/A";
@@ -103,11 +106,12 @@ async function buildSensorContext(): Promise<string> {
     const humids = recent.map((r: any) => r.data?.humidity).filter((v: any) => v != null);
     const pressures = recent.map((r: any) => r.data?.pressure).filter((v: any) => v != null);
     const gases = recent.map((r: any) => r.data?.gas_quality).filter((v: any) => v != null);
+    const vibrations = recent.map((r: any) => r.data?.vibration).filter((v: any) => v != null);
 
     // Fetch ML predictions
     const mlContext = await fetchMLContext(dataArray);
 
-    return `OPTICELL FACILITY - LIVE SENSOR DATA\nLast Update: ${ts} | Overall: ${overall}\nCurrent: Temp=${d.temprature ?? "N/A"}C(${tS}), Humidity=${d.humidity ?? "N/A"}%(${hS}), Pressure=${d.pressure ?? "N/A"}hPa(${pS}), Gas=${d.gas_quality ?? "N/A"}(${gS})\nTrends: Temp avg=${avg(temps)} ${trend(temps)}, Humidity avg=${avg(humids)} ${trend(humids)}, Pressure avg=${avg(pressures)} ${trend(pressures)}, Gas avg=${avg(gases)} ${trend(gases)}${mlContext}\nTABLE_DATA:\nTemperature|${d.temprature ?? "N/A"} C|${tS}\nHumidity|${d.humidity ?? "N/A"} %|${hS}\nPressure|${d.pressure ?? "N/A"} hPa|${pS}\nGas Quality|${d.gas_quality ?? "N/A"}|${gS}`;
+    return `OPTICELL FACILITY - LIVE SENSOR DATA\nLast Update: ${ts} | Overall: ${overall}\nCurrent: Temp=${d.temprature ?? "N/A"}C(${tS}), Humidity=${d.humidity ?? "N/A"}%(${hS}), Pressure=${d.pressure ?? "N/A"}hPa(${pS}), Gas=${d.gas_quality ?? "N/A"}(${gS}), Vibration=${d.vibration ?? "N/A"}(${vS})\nTrends: Temp avg=${avg(temps)} ${trend(temps)}, Humidity avg=${avg(humids)} ${trend(humids)}, Pressure avg=${avg(pressures)} ${trend(pressures)}, Gas avg=${avg(gases)} ${trend(gases)}, Vibration avg=${avg(vibrations)} ${trend(vibrations)}${mlContext}\nTABLE_DATA:\nTemperature|${d.temprature ?? "N/A"} C|${tS}\nHumidity|${d.humidity ?? "N/A"} %|${hS}\nPressure|${d.pressure ?? "N/A"} hPa|${pS}\nGas Quality|${d.gas_quality ?? "N/A"}|${gS}\nVibration|${d.vibration ?? "N/A"}|${vS}`;
   } catch (err) {
     console.error("Failed to parse sensor context:", err);
     return "Sensor data temporarily unavailable.";
